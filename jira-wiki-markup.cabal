@@ -1,0 +1,79 @@
+cabal-version:       2.0
+name:                jira-wiki-markup
+version:             0.0.0
+synopsis:            Handle Jira wiki markup
+description:         Handle Jira wiki markup
+homepage:            https://github.com/tarleb/jira-wiki-markup
+bug-reports:         https://github.com/tarleb/jira-wiki-markup/issues
+license:             MIT
+license-file:        LICENSE
+author:              Albert Krewinkel
+maintainer:          albert+github@zeitkraut.de
+copyright:           2019 Albert Krewinkel
+category:            Text
+build-type:          Simple
+extra-doc-files:     README.md
+                   , CHANGELOG.md
+tested-with:         GHC == 8.0.2, GHC == 8.2.2, GHC == 8.4.4, GHC == 8.6.4
+
+source-repository head
+  type:                git
+  location:            https://github.com/tarleb/jira-wiki-markup.git
+
+library
+  hs-source-dirs:      src
+  exposed-modules:     JiraWikiMarkup
+                       
+
+  build-depends:       base >= 4.9.1.0 && < 4.13
+                     
+
+  ghc-options:         -Wall
+                       -Wincomplete-uni-patterns
+                       -Wincomplete-record-updates
+                       -Wcompat
+                       -Widentities
+                       -Wredundant-constraints
+
+  default-language:    Haskell2010
+
+executable jira-wiki-markup
+  hs-source-dirs:      app
+  main-is:             Main.hs
+
+  build-depends:       base >= 4.9.1.0 && < 4.13
+                     , jira-wiki-markup
+                     
+
+  ghc-options:         -Wall
+                       -threaded
+                       -rtsopts
+                       -with-rtsopts=-N
+                       -Wincomplete-uni-patterns
+                       -Wincomplete-record-updates
+                       -Wcompat
+                       -Widentities
+                       -Wredundant-constraints
+
+  default-language:    Haskell2010
+
+test-suite jira-wiki-markup-test
+  type:                exitcode-stdio-1.0
+  hs-source-dirs:      test
+  main-is:             Spec.hs
+
+  build-depends:       base >= 4.9.1.0 && < 4.13
+                     , jira-wiki-markup
+                     
+
+  ghc-options:         -Wall
+                       -threaded
+                       -rtsopts
+                       -with-rtsopts=-N
+                       -Wincomplete-uni-patterns
+                       -Wincomplete-record-updates
+                       -Wcompat
+                       -Widentities
+                       -Wredundant-constraints
+
+  default-language:    Haskell2010
