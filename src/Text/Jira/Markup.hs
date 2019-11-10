@@ -24,7 +24,8 @@ data Inline
   deriving (Eq, Ord, Show)
 
 -- | Blocks of text.
-newtype Block
-  = Para [Inline]            -- ^ Paragraph of text
+data Block
+  = Header Int [Inline]      -- ^ Header with level and text
+  | Para [Inline]            -- ^ Paragraph of text
   deriving (Eq, Ord, Show)
 

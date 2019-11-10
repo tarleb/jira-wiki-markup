@@ -73,6 +73,9 @@ tests = testGroup "Inline"
 
       , testCase "linebreak before list fails" $
         isLeft (parseJira linebreak "\n\n") @? "newline before list"
+
+      , testCase "linebreak before header fails" $
+        isLeft (parseJira linebreak "\nh1.foo\n") @? "newline before header"
       ]
     ]
 

@@ -51,11 +51,13 @@ blankline = skipSpaces *> void newline
 endOfPara :: JiraParser ()
 endOfPara = eof
   <|> blankline
+  <|> headerStart
   <|> listStart
   <|> tableStart
   where
-    listStart  = void $ many1 (oneOf "#*-") *> char ' '
-    tableStart = void $ skipSpaces *> many1 (char '|') *> char ' '
+    headerStart = void $ try $ char 'h' *> oneOf "123456" <* char '.'
+    listStart   = void $ many1 (oneOf "#*-") *> char ' '
+    tableStart  = void $ skipSpaces *> many1 (char '|') *> char ' '
 
 -- | Variant of parsec's @notFollowedBy@ function which properly fails even if
 -- the given parser does not consume any input (like @eof@ does).
