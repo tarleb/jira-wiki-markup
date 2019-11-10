@@ -13,6 +13,7 @@ Parse Jira wiki inline markup.
 module Text.Jira.Parser.Inline
   ( inline
     -- * Inline component parsers
+  , linebreak
   , str
   , whitespace
   ) where
@@ -27,11 +28,16 @@ inline :: JiraParser Inline
 inline = choice
   [ whitespace
   , str
+  , linebreak
   ]
 
 -- | Characters with a special meaning, i.e., those used for markup.
 specialChars :: String
-specialChars = " "
+specialChars = " \n"
+
+-- | Parses an in-paragraph newline as a @Linebreak@ element.
+linebreak :: JiraParser Inline
+linebreak = Linebreak <$ try (newline <* notFollowedBy' endOfPara)
 
 -- | Parses whitespace and return a @Space@ element.
 whitespace :: JiraParser Inline

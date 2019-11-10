@@ -59,6 +59,21 @@ tests = testGroup "Inline"
         isLeft (parseJira whitespace "\n") @?
         "newline is not considered whitespace"
       ]
+
+    , testGroup "linebreak"
+      [ testCase "linebreak before text" $
+        parseJira linebreak "\na" @?=
+        Right Linebreak
+
+      , testCase "linebreak at eof fails" $
+        isLeft (parseJira linebreak "\n") @? "newline before eof"
+
+      , testCase "linebreak before blank line fails" $
+        isLeft (parseJira linebreak "\n\n") @? "newline before blank line"
+
+      , testCase "linebreak before list fails" $
+        isLeft (parseJira linebreak "\n\n") @? "newline before list"
+      ]
     ]
 
   , testGroup "inline parser"

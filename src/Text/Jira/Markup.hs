@@ -18,7 +18,8 @@ import Data.Text (Text)
 
 -- | Inline Jira markup elements.
 data Inline
-  = Str Text                 -- ^ simple, markup-less string
+  = Linebreak                -- ^ hard linebreak
+  | Str Text                 -- ^ simple, markup-less string
   | Space                    -- ^ space between words
   deriving (Eq, Ord, Show)
 

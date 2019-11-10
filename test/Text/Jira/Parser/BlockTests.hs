@@ -21,7 +21,17 @@ import Test.Tasty.HUnit (testCase, (@?=))
 
 tests :: TestTree
 tests = testGroup "Blocks"
-  [ testCase "dummy 1" $
-    parseJira block "test" @?=
-    Right (Para [Str "test"])
+  [ testGroup "components"
+    [ testGroup "paragraph"
+      [ testCase "two lines" $
+        parseJira block "one\ntwo\n" @?=
+        Right (Para [Str "one", Linebreak, Str "two"])
+      ]
+    ]
+
+  , testGroup "block parser"
+    [ testCase "single paragraph" $
+      parseJira block "Lorem ipsum." @?=
+      Right (Para [Str "Lorem", Space, Str "ipsum."])
+    ]
   ]
