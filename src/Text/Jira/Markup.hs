@@ -18,12 +18,12 @@ import Data.Text (Text)
 
 -- | Inline Jira markup elements.
 data Inline
-  = Str Text
-  | Space
+  = Str Text                 -- ^ simple, markup-less string
+  | Space                    -- ^ space between words
   deriving (Eq, Ord, Show)
 
 -- | Blocks of text.
 newtype Block
-  = Para [Inline]
+  = Para [Inline]            -- ^ Paragraph of text
   deriving (Eq, Ord, Show)
 
