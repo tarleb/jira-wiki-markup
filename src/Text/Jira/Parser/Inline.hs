@@ -17,7 +17,8 @@ module Text.Jira.Parser.Inline
 import Data.Text (pack)
 import Text.Jira.Markup
 import Text.Jira.Parser.Core
+import Text.Parsec (anyChar, many1)
 
 -- | Parses any inline element.
 inline :: JiraParser Inline
-inline = return $ Str (pack "test")
+inline = Str . pack <$> many1 anyChar

@@ -67,11 +67,16 @@ executable jira-wiki-markup
 test-suite jira-wiki-markup-test
   type:                exitcode-stdio-1.0
   hs-source-dirs:      test
-  main-is:             Spec.hs
+  main-is:             jira-wiki-markup-test.hs
+  other-modules:       Text.Jira.ParserTests
+                     , Text.Jira.Parser.BlockTests
+                     , Text.Jira.Parser.InlineTests
 
   build-depends:       base    >= 4.9   && < 5
                      , jira-wiki-markup
-                     
+                     , tasty
+                     , tasty-hunit
+                     , text    >= 1.1.1 && < 1.3
 
   ghc-options:         -Wall
                        -threaded

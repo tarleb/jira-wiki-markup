@@ -26,4 +26,4 @@ import Text.Parsec hiding (parse)
 
 -- | Parses a document into a list of blocks.
 parse :: Text -> Either ParseError [Block]
-parse = runParser (many block) defaultState ""
+parse = parseJira (many1 block)
