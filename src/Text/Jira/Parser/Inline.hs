@@ -29,7 +29,7 @@ inline = choice
   [ whitespace
   , str
   , linebreak
-  ]
+  ] <?> "inline"
 
 -- | Characters with a special meaning, i.e., those used for markup.
 specialChars :: String
@@ -38,6 +38,7 @@ specialChars = " \n"
 -- | Parses an in-paragraph newline as a @Linebreak@ element.
 linebreak :: JiraParser Inline
 linebreak = Linebreak <$ try (newline <* notFollowedBy' endOfPara)
+  <?> "linebreak"
 
 -- | Parses whitespace and return a @Space@ element.
 whitespace :: JiraParser Inline

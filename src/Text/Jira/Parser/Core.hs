@@ -20,6 +20,7 @@ module Text.Jira.Parser.Core
   -- * Parsing helpers
   , endOfPara
   , notFollowedBy'
+  , blankline
   ) where
 
 import Control.Monad (join, void)
@@ -64,7 +65,7 @@ blankline = skipSpaces *> void newline
 -- | Succeeds if the parser is looking at the end of a paragraph.
 endOfPara :: JiraParser ()
 endOfPara = eof
-  <|> blankline
+  <|> lookAhead blankline
   <|> lookAhead headerStart
   <|> lookAhead listItemStart
   <|> lookAhead tableStart

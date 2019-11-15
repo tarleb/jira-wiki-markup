@@ -131,7 +131,7 @@ tests = testGroup "Blocks"
                ]]
              ]])
 
-    , testCase "nested list after paragraph" $
+    , testCase "single nested list after paragraph" $
       let text = Text.unlines
                  [ "* line"
                  , "continued"
@@ -142,6 +142,44 @@ tests = testGroup "Blocks"
                 [ [ Para [Str "line", Linebreak, Str "continued"]
                   , List CircleBullets [[Para [Str "nested"]]]]])
 
+    , testCase "multiple nested lists after paragraph" $
+      let text = Text.unlines
+                 [ "* line"
+                 , "continued"
+                 , "** nested"
+                 , "*# another"
+                 ]
+      in parseJira list text @?=
+         Right (List CircleBullets
+                [ [ Para [Str "line", Linebreak, Str "continued"]
+                  , List CircleBullets [[Para [Str "nested"]]]
+                  , List Enumeration [[Para [Str "another"]]]]])
+
+    , testCase "item after nested list" $
+      let text = Text.unlines
+                 [ "* first"
+                 , "** nested"
+                 , "* second"
+                 ]
+      in parseJira list text @?=
+         Right (List CircleBullets
+                [ [ Para [Str "first"]
+                  , List CircleBullets [[Para [Str "nested"]]]]
+                , [ Para [Str "second"]]])
+
+    , testCase "nested lists" $
+      let text = Text.unlines
+                 [ "** eins"
+                 , "*- zwei"
+                 , "** drei"
+                 ]
+      in parseJira list text @?=
+         Right (List CircleBullets
+                 [ [ List CircleBullets [[Para [Str "eins"]]]
+                   , List SquareBullets [[Para [Str "zwei"]]]
+                   , List CircleBullets [[Para [Str "drei"]]]
+                   ]
+                 ])
     ]
 
   , testGroup "block parser"
@@ -156,5 +194,9 @@ tests = testGroup "Blocks"
     , testCase "para after header" $
       parseJira ((,) <$> block <*> block) "h2.header\nparagraph\n" @?=
       Right (Header 2 [Str "header"], Para [Str "paragraph"])
+
+    , testCase "para after list" $
+      parseJira ((,) <$> block <*> block) "* foo\n\nbar\n" @?=
+      Right (List CircleBullets [[Para [Str "foo"]]], Para [Str "bar"])
     ]
   ]
