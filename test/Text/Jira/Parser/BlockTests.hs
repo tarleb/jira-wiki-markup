@@ -195,6 +195,30 @@ tests = testGroup "Blocks"
       parseJira ((,) <$> block <*> block) "h2.header\nparagraph\n" @?=
       Right (Header 2 [Str "header"], Para [Str "paragraph"])
 
+    , testCase "... (1)" $
+      parseJira block "* foo\n" @?=
+      Right (List CircleBullets [[Para [Str "foo"]]])
+
+    , testCase "... (2)" $
+      parseJira block "* foo\n\n" @?=
+      Right (List CircleBullets [[Para [Str "foo"]]])
+
+    , testCase "... (3)" $
+      parseJira block "* foo\n\n  \n" @?=
+      Right (List CircleBullets [[Para [Str "foo"]]])
+
+    , testCase "... (4)" $
+      parseJira block "foo\n" @?=
+      Right (Para [Str "foo"])
+
+    , testCase "... (5)" $
+      parseJira ((,) <$> block <*> block) "* foo\n\n* bar\n" @?=
+      Right (List CircleBullets [[Para [Str "foo"]]], List CircleBullets [[Para [Str "bar"]]])
+
+    , testCase "... (6)" $
+      parseJira ((,) <$> block <*> block) "* foo\n\n* bar\n*bad\n\n\n" @?=
+      Right (List CircleBullets [[Para [Str "foo"]]], List CircleBullets [[Para [Str "bar"]]])
+
     , testCase "para after list" $
       parseJira ((,) <$> block <*> block) "* foo\n\nbar\n" @?=
       Right (List CircleBullets [[Para [Str "foo"]]], Para [Str "bar"])
