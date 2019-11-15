@@ -23,7 +23,7 @@ module Text.Jira.Parser.Core
   , blankline
   ) where
 
-import Control.Monad (join, void)
+import Control.Monad (join, void, guard)
 import Data.Text (Text)
 import Text.Parsec
 
@@ -56,7 +56,7 @@ parseJira parser = runParser parser defaultState ""
 
 -- | Skip zero or more space chars.
 skipSpaces :: JiraParser ()
-skipSpaces = skipMany (char ' ')
+skipSpaces = skipMany (char ' ')  -- TODO: what about '\t'?  haddock of 'blankline' suggests it's covered.
 
 -- | Parses an empty line, i.e., a line with no chars or whitespace only.
 blankline :: JiraParser ()
@@ -71,7 +71,12 @@ endOfPara = eof
   <|> lookAhead tableStart
   where
     headerStart   = void $ try $ char 'h' *> oneOf "123456" <* char '.'
-    listItemStart = void $ many1 (oneOf "#*-") *> char ' '
+    listItemStart = do
+      guard . not . stateInList =<< getState  -- (i don't think this change is needed; move
+                                              -- 'endOfPara' to "Inline.hs" and make it
+                                              -- private to that moduleto make the context
+                                              -- more obvious?)
+      void $ many1 (oneOf "#*-") *> char ' '
     tableStart    = void $ skipSpaces *> many1 (char '|') *> char ' '
 
 -- | Variant of parsec's @notFollowedBy@ function which properly fails even if

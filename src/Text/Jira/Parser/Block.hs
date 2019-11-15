@@ -36,7 +36,7 @@ block = choice
 -- | Parses a paragraph into a @Para@.
 para :: JiraParser Block
 para = (<?> "para") . try $
-  let dropTrailingWhitespace = dropWhileEnd (`elem` [Linebreak, Space])
+  let dropTrailingWhitespace = dropWhileEnd (`elem` [Linebreak, Space])  -- TODO: do you only want to drop these here?  not in header, list?
   in Para . dropTrailingWhitespace <$> many1 inline <* (eof <|> void newline)
 
 -- | Parses a header line into a @Header@.
@@ -51,6 +51,9 @@ list :: JiraParser Block
 list = (<?> "list") . try $ do
   guard . not . stateInList =<< getState
   -- withStateFlag (\b st -> st { stateInList = b }) $
+        -- TODO: yes, it works less with this enabled, but does that
+        -- mean you don't need the flag at all?  that would simplify
+        -- your code a lot.  :)
   listAtDepth 0
   where
     listAtDepth :: Int -> JiraParser Block

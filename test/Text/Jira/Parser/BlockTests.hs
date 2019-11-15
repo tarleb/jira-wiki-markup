@@ -187,6 +187,10 @@ tests = testGroup "Blocks"
       parseJira block "Lorem ipsum." @?=
       Right (Para [Str "Lorem", Space, Str "ipsum."])
 
+    , testCase "two paragraphs" $
+      parseJira ((,) <$> block <*> block) "Lorem ipsum.\n\nanother\none." @?=
+      Right (Para [Str "Lorem", Space, Str "ipsum."], Para [Str "another", Linebreak, Str "one."])
+
     , testCase "para before header" $
       parseJira ((,) <$> block <*> block) "paragraph\nh1.header\n" @?=
       Right (Para [Str "paragraph"], Header 1 [Str "header"])
@@ -217,7 +221,7 @@ tests = testGroup "Blocks"
 
     , testCase "... (6)" $
       parseJira ((,) <$> block <*> block) "* foo\n\n* bar\n*bad\n\n\n" @?=
-      Right (List CircleBullets [[Para [Str "foo"]]], List CircleBullets [[Para [Str "bar"]]])
+      Right (List CircleBullets [[Para [Str "foo"]]], List CircleBullets [[Para [Str "bar"]], [Para [Str "bad"]]])
 
     , testCase "para after list" $
       parseJira ((,) <$> block <*> block) "* foo\n\nbar\n" @?=
