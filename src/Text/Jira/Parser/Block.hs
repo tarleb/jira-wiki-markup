@@ -13,9 +13,11 @@ module Text.Jira.Parser.Block
   ( block
     -- * Parsers for block types
   , header
+  , list
   , para
   ) where
 
+import Control.Monad (guard, void, when)
 import Data.List (dropWhileEnd)
 import Data.Char (digitToInt)
 import Text.Jira.Markup
@@ -27,14 +29,18 @@ import Text.Parsec
 block :: JiraParser Block
 block = choice
   [ header
+  , list
   , para
-  ]
+  ] <* skipWhitespace
 
 -- | Parses a paragraph into a @Para@.
 para :: JiraParser Block
-para = (<?> "paragraph") . try $
-  Para . dropWhileEnd (`elem` [Linebreak, Space])
-       <$> many1 inline <* optional newline
+para = (<?> "para") . try $ do
+  let dropTrailingWhitespace = dropWhileEnd (`elem` [Linebreak, Space])
+  isInList <- stateInList <$> getState
+  when isInList $
+    notFollowedBy' blankline
+  Para . dropTrailingWhitespace <$> many1 inline
 
 -- | Parses a header line into a @Header@.
 header :: JiraParser Block
@@ -42,3 +48,67 @@ header = (<?> "header") . try $ do
   level <- digitToInt <$> (char 'h' *> oneOf "123456" <* char '.')
   content <- skipMany (char ' ') *> inline `manyTill` newline
   return $ Header level content
+
+-- | Parses a list into @List@.
+list :: JiraParser Block
+list = (<?> "list") . try $ do
+  guard . not . stateInList =<< getState
+  withStateFlag (\b st -> st { stateInList = b }) $
+    listAtDepth 0
+  where
+    listAtDepth :: Int -> JiraParser Block
+    listAtDepth depth = try $ atDepth depth *> listAtDepth' depth
+
+    listAtDepth' :: Int -> JiraParser Block
+    listAtDepth' depth = try $ do
+      bulletChar <- anyBulletMarker
+      first <- firstItemAtDepth depth
+      rest  <- many (try $ listItemAtDepth depth (char bulletChar))
+      return $ List (style bulletChar) (first:rest)
+
+    style :: Char -> ListStyle
+    style c = case c of
+      '-' -> SquareBullets
+      '*' -> CircleBullets
+      '#' -> Enumeration
+      _   -> error ("the impossible happened: unknown style for bullet " ++ [c])
+
+    atDepth :: Int -> JiraParser ()
+    atDepth depth = try . void $ count depth anyBulletMarker
+
+    firstItemAtDepth :: Int -> JiraParser [Block]
+    firstItemAtDepth depth = try $ listContent (depth + 1) <|>
+      do
+        blocks <- nonListContent
+        nestedLists <- try . many $ listAtDepth (depth + 1)
+        return $ blocks ++ nestedLists
+
+    listItemAtDepth :: Int -> JiraParser Char -> JiraParser [Block]
+    listItemAtDepth depth bulletChar = atDepth depth *>
+        try (bulletChar *> nonListContent) <|>
+        try (anyBulletMarker *> listContent depth)
+
+    listContent :: Int -> JiraParser [Block]
+    listContent depth = do
+        first <- listAtDepth' depth
+        rest <- many (listAtDepth depth)
+        return (first : rest)
+
+    anyBulletMarker :: JiraParser Char
+    anyBulletMarker = oneOf "*-#"
+
+    nonListContent :: JiraParser [Block]
+    nonListContent = try $
+      let nonListBlock = notFollowedBy' (many1 (oneOf "#-*")) *> block
+      in char ' ' *> do
+        first <- block
+        rest  <- many nonListBlock
+        return (first : rest)
+
+-- | Skip whitespace till we reach the next block
+skipWhitespace :: JiraParser ()
+skipWhitespace = optional $ do
+  isInList <- stateInList <$> getState
+  if isInList
+    then blankline
+    else skipMany blankline

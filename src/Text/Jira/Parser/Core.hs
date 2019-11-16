@@ -16,9 +16,11 @@ module Text.Jira.Parser.Core
   , ParserState (..)
   , defaultState
   , parseJira
+  , withStateFlag
   -- * Parsing helpers
   , endOfPara
   , notFollowedBy'
+  , blankline
   ) where
 
 import Control.Monad (join, void)
@@ -29,11 +31,24 @@ import Text.Parsec
 type JiraParser = Parsec Text ParserState
 
 -- | Parser state used to keep track of various parameteres.
-data ParserState = ParserState
+newtype ParserState = ParserState
+  { stateInList      :: Bool
+  }
 
 -- | Default parser state (i.e., start state)
 defaultState :: ParserState
 defaultState = ParserState
+  { stateInList      = False
+  }
+
+-- | Set a flag in the parser to @True@ before running a parser, then
+-- set the flag's value to @False@.
+withStateFlag :: (Bool -> ParserState -> ParserState)
+              -> JiraParser a
+              -> JiraParser a
+withStateFlag flagSetter parser = try $
+  let setFlag = modifyState . flagSetter
+  in setFlag True *> parser <* setFlag False
 
 -- | Parses a string with the given Jira parser.
 parseJira :: JiraParser a -> Text -> Either ParseError a
@@ -45,19 +60,19 @@ skipSpaces = skipMany (char ' ')
 
 -- | Parses an empty line, i.e., a line with no chars or whitespace only.
 blankline :: JiraParser ()
-blankline = skipSpaces *> void newline
+blankline = try $ skipSpaces *> void newline
 
 -- | Succeeds if the parser is looking at the end of a paragraph.
 endOfPara :: JiraParser ()
 endOfPara = eof
-  <|> blankline
-  <|> headerStart
-  <|> listStart
-  <|> tableStart
+  <|> lookAhead blankline
+  <|> lookAhead headerStart
+  <|> lookAhead listItemStart
+  <|> lookAhead tableStart
   where
-    headerStart = void $ try $ char 'h' *> oneOf "123456" <* char '.'
-    listStart   = void $ many1 (oneOf "#*-") *> char ' '
-    tableStart  = void $ skipSpaces *> many1 (char '|') *> char ' '
+    headerStart   = void $ try $ char 'h' *> oneOf "123456" <* char '.'
+    listItemStart = void $ many1 (oneOf "#*-") *> char ' '
+    tableStart    = void $ skipSpaces *> many1 (char '|') *> char ' '
 
 -- | Variant of parsec's @notFollowedBy@ function which properly fails even if
 -- the given parser does not consume any input (like @eof@ does).

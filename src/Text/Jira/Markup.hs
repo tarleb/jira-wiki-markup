@@ -12,6 +12,7 @@ Jira markup types.
 module Text.Jira.Markup
   ( Block (..)
   , Inline (..)
+  , ListStyle (..)
   ) where
 
 import Data.Text (Text)
@@ -26,6 +27,13 @@ data Inline
 -- | Blocks of text.
 data Block
   = Header Int [Inline]      -- ^ Header with level and text
+  | List ListStyle [[Block]] -- ^ List
   | Para [Inline]            -- ^ Paragraph of text
   deriving (Eq, Ord, Show)
 
+-- | Style used for list items.
+data ListStyle
+  = CircleBullets            -- ^ List with round bullets
+  | SquareBullets            -- ^ List with square bullets
+  | Enumeration              -- ^ Enumeration, i.e., numbered items
+  deriving (Eq, Ord, Show)
