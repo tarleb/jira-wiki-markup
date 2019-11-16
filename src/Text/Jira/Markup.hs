@@ -15,6 +15,8 @@ module Text.Jira.Markup
   , ListStyle (..)
   , Row (..)
   , Cell (..)
+  , Language (..)
+  , Parameter (..)
   ) where
 
 import Data.Text (Text)
@@ -28,7 +30,8 @@ data Inline
 
 -- | Blocks of text.
 data Block
-  = Header Int [Inline]      -- ^ Header with level and text
+  = Code Language [Parameter] Text      -- ^ Code block with panel parameters
+  | Header Int [Inline]      -- ^ Header with level and text
   | List ListStyle [[Block]] -- ^ List
   | Para [Inline]            -- ^ Paragraph of text
   | Table [Row]              -- ^ Table
@@ -50,3 +53,13 @@ data Cell
   = BodyCell [Block]
   | HeaderCell [Block]
   deriving (Eq, Ord, Show)
+
+-- | Programming language used for syntax highlighting.
+newtype Language = Language Text
+  deriving (Eq, Ord, Show)
+
+-- | Panel parameter
+data Parameter = Parameter
+  { parameterKey :: Text
+  , parameterValue :: Text
+  } deriving (Eq, Ord, Show)

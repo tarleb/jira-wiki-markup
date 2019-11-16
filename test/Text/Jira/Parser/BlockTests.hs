@@ -235,6 +235,30 @@ tests = testGroup "Blocks"
         Right (Table [Row [BodyCell [ List CircleBullets [[Para [Str "foo"]]]
                                     , List SquareBullets [[Para [Str "bar"]]]]]])
       ]
+
+    , testGroup "Code"
+      [ testCase "no language" $
+        parseJira code "{code}\nprint('Hi Mom!'){code}\n" @?=
+        Right (Code (Language "java") [] "print('Hi Mom!')")
+
+      , testCase "with language" $
+        parseJira code "{code:swift}\nfunc foo() -> Int { return 4 }{code}\n" @?=
+        Right (Code (Language "swift") []
+               "func foo() -> Int { return 4 }")
+
+      , testCase "with parameters" $
+        parseJira code "{code:title=coffee|bgColor=#ccc}\nblack(){code}\n" @?=
+        Right (Code (Language "java")
+               [Parameter "title" "coffee", Parameter "bgColor" "#ccc"]
+               "black()")
+
+      , testCase "with language and parameter" $
+        parseJira code
+        "{code:haskell|title=Hello World}\nputStrLn \"Hello, World!\"{code}\n" @?=
+        Right (Code (Language "haskell")
+               [Parameter "title" "Hello World"]
+               "putStrLn \"Hello, World!\"")
+      ]
     ]
 
   , testGroup "block combinations"
@@ -268,5 +292,15 @@ tests = testGroup "Blocks"
       parseJira ((,) <$> block <*> block) "|| love\n\npeace\n" @?=
       Right ( Table [Row [HeaderCell [Para [Str "love"]]]]
             , Para [Str "peace"])
+
+    , testCase "para before code" $
+      parseJira ((,) <$> block <*> block) "nice\n{code}\nhappy(){code}\n" @?=
+      Right ( Para [Str "nice"]
+            , Code (Language "java") [] "happy()")
+
+    , testCase "para after code" $
+      parseJira ((,) <$> block <*> block) "{code}\nfn(){code}\ntext" @?=
+      Right ( Code (Language "java") [] "fn()"
+            , Para [Str "text"])
     ]
   ]

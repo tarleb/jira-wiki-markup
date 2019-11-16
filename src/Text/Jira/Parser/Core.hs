@@ -72,10 +72,12 @@ endOfPara = eof
   <|> lookAhead headerStart
   <|> lookAhead listItemStart
   <|> lookAhead tableStart
+  <|> lookAhead codeStart
   where
     headerStart   = void $ try $ char 'h' *> oneOf "123456" <* char '.'
     listItemStart = void $ many1 (oneOf "#*-") *> char ' '
     tableStart    = void $ skipSpaces *> many1 (char '|') *> char ' '
+    codeStart     = void $ string "{code"
 
 -- | Variant of parsec's @notFollowedBy@ function which properly fails even if
 -- the given parser does not consume any input (like @eof@ does).

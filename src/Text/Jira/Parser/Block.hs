@@ -12,6 +12,7 @@ Parse Jira wiki blocks.
 module Text.Jira.Parser.Block
   ( block
     -- * Parsers for block types
+  , code
   , header
   , list
   , para
@@ -21,6 +22,7 @@ module Text.Jira.Parser.Block
 import Control.Monad (guard, void, when)
 import Data.List (dropWhileEnd)
 import Data.Char (digitToInt)
+import Data.Text (pack)
 import Text.Jira.Markup
 import Text.Jira.Parser.Core
 import Text.Jira.Parser.Inline
@@ -32,6 +34,7 @@ block = choice
   [ header
   , list
   , table
+  , code
   , para
   ] <* skipWhitespace
 
@@ -135,6 +138,27 @@ cellStart = try
   *> option BodyCell (HeaderCell <$ many1 (char '|'))
   <* skipSpaces
   <* notFollowedBy' newline
+
+-- | Parses a code block into a @Code@ element.
+code :: JiraParser Block
+code = try $ do
+  (lang, params) <- string "{code" *> parameters <* char '}' <* blankline
+  content <- anyChar `manyTill` try (string "{code}" *> skipSpaces *> newline)
+  return $ Code lang params (pack content)
+
+-- | Parses a set of panel parameters
+parameters :: JiraParser (Language, [Parameter])
+parameters = option (defaultLanguage, []) $ do
+  _      <- char ':'
+  lang   <- option defaultLanguage (try language)
+  params <- try (Parameter <$> key <*> (char '=' *> value)) `sepBy` pipe
+  return (lang, params)
+  where
+    defaultLanguage = Language (pack "java")
+    pipe     = char '|'
+    key      = pack <$> many1 (noneOf "\"'\t\n\r |{}=")
+    value    = pack <$> many1 (noneOf "\"'\n\r|{}=")
+    language = Language <$> key <* (pipe <|> lookAhead (char '}'))
 
 -- | Skip whitespace till we reach the next block
 skipWhitespace :: JiraParser ()
