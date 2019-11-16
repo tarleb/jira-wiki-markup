@@ -15,6 +15,7 @@ module Text.Jira.Parser.Block
   , header
   , list
   , para
+  , table
   ) where
 
 import Control.Monad (guard, void, when)
@@ -30,6 +31,7 @@ block :: JiraParser Block
 block = choice
   [ header
   , list
+  , table
   , para
   ] <* skipWhitespace
 
@@ -105,10 +107,41 @@ list = (<?> "list") . try $ do
         rest  <- many nonListBlock
         return (first : rest)
 
+-- | Parses a table into a @Table@ element.
+table :: JiraParser Block
+table = do
+  guard . not . stateInTable =<< getState
+  withStateFlag (\b st -> st { stateInTable = b }) $
+    Table <$> many1 row
+
+-- | Parses a table row.
+row :: JiraParser Row
+row = fmap Row . try $
+  many1 cell <* optional (skipMany (oneOf " |") *> newline)
+
+-- | Parses a table cell.
+cell :: JiraParser Cell
+cell = try $ do
+  mkCell <- cellStart
+  bs     <- many1 block
+  return $ mkCell bs
+
+-- | Parses the beginning of a table cell and returns a function which
+-- constructs a cell of the appropriate type when given the cell's content.
+cellStart :: JiraParser ([Block] -> Cell)
+cellStart = try
+  $  skipSpaces
+  *> char '|'
+  *> option BodyCell (HeaderCell <$ many1 (char '|'))
+  <* skipSpaces
+  <* notFollowedBy' newline
+
 -- | Skip whitespace till we reach the next block
 skipWhitespace :: JiraParser ()
 skipWhitespace = optional $ do
-  isInList <- stateInList <$> getState
-  if isInList
-    then blankline
-    else skipMany blankline
+  isInList  <- stateInList  <$> getState
+  isInTable <- stateInTable <$> getState
+  case (isInList, isInTable) of
+    (True, _) -> blankline
+    (_, True) -> skipSpaces
+    _         -> skipMany blankline

@@ -21,6 +21,7 @@ module Text.Jira.Parser.Core
   , endOfPara
   , notFollowedBy'
   , blankline
+  , skipSpaces
   ) where
 
 import Control.Monad (join, void)
@@ -31,14 +32,16 @@ import Text.Parsec
 type JiraParser = Parsec Text ParserState
 
 -- | Parser state used to keep track of various parameteres.
-newtype ParserState = ParserState
-  { stateInList      :: Bool
+data ParserState = ParserState
+  { stateInList      :: Bool            -- ^ whether the parser is within a list
+  , stateInTable     :: Bool            -- ^ whether the parser is within a table
   }
 
 -- | Default parser state (i.e., start state)
 defaultState :: ParserState
 defaultState = ParserState
   { stateInList      = False
+  , stateInTable     = False
   }
 
 -- | Set a flag in the parser to @True@ before running a parser, then

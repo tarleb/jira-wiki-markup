@@ -180,6 +180,61 @@ tests = testGroup "Blocks"
                     ]
                   ])
       ]
+
+    , testGroup "Table"
+      [ testCase "single cell" $
+        parseJira table "| Lua \n" @?=
+        Right (Table [Row [BodyCell [Para [Str "Lua"]]]])
+
+      , testCase "header cell" $
+        parseJira table "|| Language\n" @?=
+        Right (Table [Row [HeaderCell [Para [Str "Language"]]]])
+
+      , testCase "2x2 table" $
+        parseJira table
+        (Text.unlines [ "|| Language || Type ||"
+                           , "| Lua | dynamic |\n"])
+        @?=
+        Right (Table [ Row [ HeaderCell [Para [Str "Language"]]
+                           , HeaderCell [Para [Str "Type"]]
+                           ]
+                     , Row [ BodyCell [Para [Str "Lua"]]
+                           , BodyCell [Para [Str "dynamic"]]
+                           ]
+                     ])
+
+      , testCase "row headeres" $
+        parseJira table
+        (Text.unlines [ "|| Language | Haskell ||"
+                           , "|| Type | static |\n"])
+        @?=
+        Right (Table [ Row [ HeaderCell [Para [Str "Language"]]
+                           , BodyCell [Para [Str "Haskell"]]
+                           ]
+                     , Row [ HeaderCell [Para [Str "Type"]]
+                           , BodyCell [Para [Str "static"]]
+                           ]
+                     ])
+
+      , testCase "list in table" $
+        parseJira table "| * foo\n* bar\n" @?=
+        Right (Table [
+                  Row [BodyCell [List CircleBullets
+                                  [ [Para [Str "foo"]]
+                                  , [Para [Str "bar"]]
+                                  ]]]])
+
+      , testCase "multiple line cells" $
+        parseJira table "| foo\nbar | baz |\n" @?=
+        Right (Table [
+                  Row [ BodyCell [Para [Str "foo", Linebreak, Str "bar"]]
+                      , BodyCell [Para [Str "baz"]]]])
+
+      , testCase "multiple lists in cell" $
+        parseJira table "| * foo\n- bar\n" @?=
+        Right (Table [Row [BodyCell [ List CircleBullets [[Para [Str "foo"]]]
+                                    , List SquareBullets [[Para [Str "bar"]]]]]])
+      ]
     ]
 
   , testGroup "block combinations"
@@ -203,5 +258,15 @@ tests = testGroup "Blocks"
       parseJira ((,) <$> block <*> block) "* foo\n\n* bar\n" @?=
       Right ( List CircleBullets [[Para [Str "foo"]]]
             , List CircleBullets [[Para [Str "bar"]]])
+
+    , testCase "para after table" $
+      parseJira ((,) <$> block <*> block) "|| point |\nhuh\n" @?=
+      Right ( Table [Row [HeaderCell [Para [Str "point"]]]]
+            , Para [Str "huh"])
+
+    , testCase "para after blankline terminated table" $
+      parseJira ((,) <$> block <*> block) "|| love\n\npeace\n" @?=
+      Right ( Table [Row [HeaderCell [Para [Str "love"]]]]
+            , Para [Str "peace"])
     ]
   ]
