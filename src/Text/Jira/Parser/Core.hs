@@ -17,6 +17,9 @@ module Text.Jira.Parser.Core
   , defaultState
   , parseJira
   , withStateFlag
+  -- * String position tracking
+  , updateLastStrPos
+  , notAfterString
   -- * Parsing helpers
   , endOfPara
   , notFollowedBy'
@@ -35,6 +38,8 @@ type JiraParser = Parsec Text ParserState
 data ParserState = ParserState
   { stateInList      :: Bool            -- ^ whether the parser is within a list
   , stateInTable     :: Bool            -- ^ whether the parser is within a table
+  , stateLastStrPos  :: Maybe SourcePos -- ^ position at which the last string
+                                        --   ended
   }
 
 -- | Default parser state (i.e., start state)
@@ -42,6 +47,7 @@ defaultState :: ParserState
 defaultState = ParserState
   { stateInList      = False
   , stateInTable     = False
+  , stateLastStrPos  = Nothing
   }
 
 -- | Set a flag in the parser to @True@ before running a parser, then
@@ -52,6 +58,20 @@ withStateFlag :: (Bool -> ParserState -> ParserState)
 withStateFlag flagSetter parser = try $
   let setFlag = modifyState . flagSetter
   in setFlag True *> parser <* setFlag False
+
+-- | Updates the state, marking the current input position as the end of a
+-- string.
+updateLastStrPos :: JiraParser ()
+updateLastStrPos = do
+  pos <- getPosition
+  modifyState $ \st -> st { stateLastStrPos = Just pos }
+
+-- | Checks whether the parser is directly after a string.
+notAfterString :: JiraParser Bool
+notAfterString = do
+  curPos <- getPosition
+  prevPos <- stateLastStrPos <$> getState
+  return (Just curPos /= prevPos)
 
 -- | Parses a string with the given Jira parser.
 parseJira :: JiraParser a -> Text -> Either ParseError a

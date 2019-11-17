@@ -15,9 +15,12 @@ module Text.Jira.Parser.Inline
     -- * Inline component parsers
   , linebreak
   , str
+  , strong
   , whitespace
   ) where
 
+import Control.Monad (guard, void)
+import Data.Char (isLetter)
 import Data.Text (pack, singleton)
 import Text.Jira.Markup
 import Text.Jira.Parser.Core
@@ -29,6 +32,7 @@ inline = choice
   [ whitespace
   , str
   , linebreak
+  , strong
   , symbol
   ] <?> "inline"
 
@@ -38,7 +42,7 @@ specialChars = " \n" ++ symbolChars
 
 -- | Special characters which can be part of a string.
 symbolChars :: String
-symbolChars = "|"
+symbolChars = "*|"
 
 -- | Parses an in-paragraph newline as a @Linebreak@ element.
 linebreak :: JiraParser Inline
@@ -53,6 +57,11 @@ whitespace = Space <$ skipMany1 (char ' ') <?> "whitespace"
 str :: JiraParser Inline
 str = Str . pack
   <$> (many1 (noneOf specialChars) <?> "string")
+  <* updateLastStrPos
+
+-- | Parses strongly emphasized text into @Strong@.
+strong :: JiraParser Inline
+strong = Strong <$> ('*' `delimitingMany` inline) <?> "strong"
 
 -- | Parses a special character symbol as a @Str@.
 symbol :: JiraParser Inline
@@ -62,3 +71,21 @@ symbol = Str . singleton <$> do
     return $ if b then (/= '|') else const True
   oneOf $ filter inTablePred symbolChars
   <?> "symbol"
+
+--
+-- Helpers
+--
+
+-- | Parse text delimited by a character.
+delimitingMany :: Char -> JiraParser a -> JiraParser [a]
+delimitingMany c = enclosed (char c) (char c)
+
+enclosed :: JiraParser opening -> JiraParser closing
+         -> JiraParser a
+         -> JiraParser [a]
+enclosed opening closing parser = try $ do
+  guard =<< notAfterString
+  opening *> notFollowedBy space *> manyTill parser closing'
+  where
+    closing' = try $ closing <* lookAhead wordBoundary
+    wordBoundary = void (satisfy (not . isLetter)) <|> eof

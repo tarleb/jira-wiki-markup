@@ -26,6 +26,7 @@ data Inline
   = Linebreak                -- ^ hard linebreak
   | Str Text                 -- ^ simple, markup-less string
   | Space                    -- ^ space between words
+  | Strong [Inline]          -- ^ strongly emphasized text
   deriving (Eq, Ord, Show)
 
 -- | Blocks of text.

@@ -77,6 +77,19 @@ tests = testGroup "Inline"
       , testCase "linebreak before header fails" $
         isLeft (parseJira linebreak "\nh1.foo\n") @? "newline before header"
       ]
+
+    , testGroup "strong"
+      [ testCase "single word" $
+        parseJira strong "*single*" @?= Right (Strong [Str "single"])
+
+      , testCase "multi word" $
+        parseJira strong "*multiple words*" @?=
+        Right (Strong [Str "multiple", Space, Str "words"])
+
+      , testCase "fails for emph" $
+        isLeft (parseJira strong "_emph_") @? "emph as strong"
+      ]
+
     ]
 
   , testGroup "inline parser"
