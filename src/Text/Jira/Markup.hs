@@ -31,6 +31,7 @@ data Inline
   | Inserted [Inline]        -- ^ text marked as having been inserted
   | Linebreak                -- ^ hard linebreak
   | Link [Inline] URL        -- ^ hyperlink with alias
+  | Monospaced [Inline]      -- ^ text rendered with monospaced font
   | Str Text                 -- ^ simple, markup-less string
   | Space                    -- ^ space between words
   | Strong [Inline]          -- ^ strongly emphasized text

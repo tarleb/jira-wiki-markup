@@ -93,6 +93,10 @@ tests = testGroup "Inline"
       parseJira inserted "+multiple words+" @?=
       Right (Inserted [Str "multiple", Space, Str "words"])
 
+    , testCase "monospaced" $
+      parseJira monospaced "{{multiple words}}" @?=
+      Right (Monospaced [Str "multiple", Space, Str "words"])
+
     , testGroup "linebreak"
       [ testCase "linebreak before text" $
         parseJira linebreak "\na" @?=

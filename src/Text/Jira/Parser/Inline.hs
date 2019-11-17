@@ -20,6 +20,7 @@ module Text.Jira.Parser.Inline
   , image
   , linebreak
   , link
+  , monospaced
   , str
   , strong
   , subscript
@@ -49,6 +50,7 @@ inline = choice
   , superscript
   , deleted
   , inserted
+  , monospaced
   , anchor
   , symbol
   ] <?> "inline"
@@ -127,6 +129,12 @@ emph = Emph <$> ('_' `delimitingMany` inline) <?> "emphasis"
 -- | Parses inserted text into @Inserted@.
 inserted :: JiraParser Inline
 inserted = Inserted <$> ('+' `delimitingMany` inline) <?> "inserted"
+
+-- | Parses monospaced text into @Monospaced@.
+monospaced :: JiraParser Inline
+monospaced = Monospaced
+  <$> enclosed (try $ string "{{") (try $ string "}}") inline
+  <?> "monospaced"
 
 -- | Parses strongly emphasized text into @Strong@.
 strong :: JiraParser Inline
