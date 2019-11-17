@@ -60,6 +60,10 @@ tests = testGroup "Inline"
         "newline is not considered whitespace"
       ]
 
+    , testCase "deleted" $
+      parseJira deleted "-far-fetched-" @?=
+      Right (Deleted [Str "far", Str "-", Str "fetched"])
+
     , testGroup "emph"
       [ testCase "single word" $
         parseJira emph "_single_" @?= Right (Emph [Str "single"])
@@ -84,6 +88,10 @@ tests = testGroup "Inline"
       , testCase "fails for strong" $
         isLeft (parseJira emph "*strong*") @? "strong as emph"
       ]
+
+    , testCase "inserted" $
+      parseJira inserted "+multiple words+" @?=
+      Right (Inserted [Str "multiple", Space, Str "words"])
 
     , testGroup "linebreak"
       [ testCase "linebreak before text" $

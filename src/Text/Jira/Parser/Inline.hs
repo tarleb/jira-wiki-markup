@@ -13,7 +13,9 @@ Parse Jira wiki inline markup.
 module Text.Jira.Parser.Inline
   ( inline
     -- * Inline component parsers
+  , deleted
   , emph
+  , inserted
   , linebreak
   , str
   , strong
@@ -35,6 +37,8 @@ inline = choice
   , linebreak
   , emph
   , strong
+  , deleted
+  , inserted
   , symbol
   ] <?> "inline"
 
@@ -44,11 +48,7 @@ specialChars = " \n" ++ symbolChars
 
 -- | Special characters which can be part of a string.
 symbolChars :: String
-symbolChars = "_*|"
-
--- | Parses emphasized text into @Emph@.
-emph :: JiraParser Inline
-emph = Emph <$> ('_' `delimitingMany` inline) <?> "emphasis"
+symbolChars = "_+-*|"
 
 -- | Parses an in-paragraph newline as a @Linebreak@ element.
 linebreak :: JiraParser Inline
@@ -65,10 +65,6 @@ str = Str . pack
   <$> (many1 (noneOf specialChars) <?> "string")
   <* updateLastStrPos
 
--- | Parses strongly emphasized text into @Strong@.
-strong :: JiraParser Inline
-strong = Strong <$> ('*' `delimitingMany` inline) <?> "strong"
-
 -- | Parses a special character symbol as a @Str@.
 symbol :: JiraParser Inline
 symbol = Str . singleton <$> do
@@ -77,6 +73,25 @@ symbol = Str . singleton <$> do
     return $ if b then (/= '|') else const True
   oneOf $ filter inTablePred symbolChars
   <?> "symbol"
+
+--
+-- Markup
+--
+-- | Parses deleted text into @Deleted@.
+deleted :: JiraParser Inline
+deleted = Deleted <$> ('-' `delimitingMany` inline) <?> "deleted"
+
+-- | Parses emphasized text into @Emph@.
+emph :: JiraParser Inline
+emph = Emph <$> ('_' `delimitingMany` inline) <?> "emphasis"
+
+-- | Parses inserted text into @Inserted@.
+inserted :: JiraParser Inline
+inserted = Inserted <$> ('+' `delimitingMany` inline) <?> "inserted"
+
+-- | Parses strongly emphasized text into @Strong@.
+strong :: JiraParser Inline
+strong = Strong <$> ('*' `delimitingMany` inline) <?> "strong"
 
 --
 -- Helpers
