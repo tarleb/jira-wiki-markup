@@ -22,7 +22,6 @@ module Text.Jira.Parser.Block
   ) where
 
 import Control.Monad (guard, void, when)
-import Data.List (dropWhileEnd)
 import Data.Char (digitToInt)
 import Data.Text (pack)
 import Text.Jira.Markup
@@ -45,18 +44,17 @@ block = choice
 -- | Parses a paragraph into a @Para@.
 para :: JiraParser Block
 para = (<?> "para") . try $ do
-  let dropTrailingWhitespace = dropWhileEnd (`elem` [Linebreak, Space])
   isInList <- stateInList <$> getState
   when isInList $
     notFollowedBy' blankline
-  Para . dropTrailingWhitespace <$> many1 inline
+  Para . normalizeInlines <$> many1 inline
 
 -- | Parses a header line into a @Header@.
 header :: JiraParser Block
 header = (<?> "header") . try $ do
   level <- digitToInt <$> (char 'h' *> oneOf "123456" <* char '.')
   content <- skipMany (char ' ') *> inline `manyTill` newline
-  return $ Header level content
+  return $ Header level (normalizeInlines content)
 
 -- | Parses a list into @List@.
 list :: JiraParser Block

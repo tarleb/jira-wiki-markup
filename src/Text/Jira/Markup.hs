@@ -1,3 +1,4 @@
+{-# LANGUAGE LambdaCase #-}
 {-|
 Module      : Text.Jira.Markup
 Copyright   : © 2019 Albert Krewinkel
@@ -18,6 +19,7 @@ module Text.Jira.Markup
   , Cell (..)
   , Language (..)
   , Parameter (..)
+  , normalizeInlines
   ) where
 
 import Data.Text (Text)
@@ -80,3 +82,15 @@ data Parameter = Parameter
   { parameterKey :: Text
   , parameterValue :: Text
   } deriving (Eq, Ord, Show)
+
+-- | Normalize a list of inlines, merging elements where possible.
+normalizeInlines :: [Inline] -> [Inline]
+normalizeInlines = \case
+  []                     -> []
+  [Space]                -> []
+  [Linebreak]            -> []
+  Space : Space : xs     -> Space : normalizeInlines xs
+  Space : Linebreak : xs -> Linebreak : normalizeInlines xs
+  Linebreak : Space : xs -> Linebreak : normalizeInlines xs
+  Str s1 : Str s2 : xs   -> Str (s1 <> s2) : normalizeInlines xs
+  x : xs                 -> x : normalizeInlines xs
