@@ -22,7 +22,7 @@ module Text.Jira.Markup
   , normalizeInlines
   ) where
 
-import Data.Text (Text)
+import Data.Text (Text, append)
 
 -- | Inline Jira markup elements.
 data Inline
@@ -93,5 +93,5 @@ normalizeInlines = \case
   Space : Space : xs     -> Space : normalizeInlines xs
   Space : Linebreak : xs -> Linebreak : normalizeInlines xs
   Linebreak : Space : xs -> Linebreak : normalizeInlines xs
-  Str s1 : Str s2 : xs   -> Str (s1 <> s2) : normalizeInlines xs
+  Str s1 : Str s2 : xs   -> Str (s1 `append` s2) : normalizeInlines xs
   x : xs                 -> x : normalizeInlines xs
