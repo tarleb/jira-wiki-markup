@@ -24,7 +24,8 @@ import Data.Text (Text)
 
 -- | Inline Jira markup elements.
 data Inline
-  = Deleted [Inline]         -- ^ deleted (struk-out) text
+  = Anchor Text              -- ^ anchor for internal links
+  | Deleted [Inline]         -- ^ deleted (struk-out) text
   | Emph [Inline]            -- ^ emphasized text
   | Image URL                -- ^ an image
   | Inserted [Inline]        -- ^ text marked as having been inserted

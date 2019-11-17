@@ -131,6 +131,10 @@ tests = testGroup "Inline"
       parseJira superscript "^multiple words^" @?=
       Right (Superscript [Str "multiple", Space, Str "words"])
 
+    , testCase "anchor" $
+      parseJira anchor "{anchor:testing}" @?=
+      Right (Anchor "testing")
+
     , testGroup "link"
       [ testCase "unaliased link" $
         parseJira link "[https://example.org]" @?=

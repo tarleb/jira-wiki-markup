@@ -13,6 +13,7 @@ Parse Jira wiki inline markup.
 module Text.Jira.Parser.Inline
   ( inline
     -- * Inline component parsers
+  , anchor
   , deleted
   , emph
   , inserted
@@ -48,6 +49,7 @@ inline = choice
   , superscript
   , deleted
   , inserted
+  , anchor
   , symbol
   ] <?> "inline"
 
@@ -57,7 +59,7 @@ specialChars = " \n" ++ symbolChars
 
 -- | Special characters which can be part of a string.
 symbolChars :: String
-symbolChars = "_+-*^~|[]!"
+symbolChars = "_+-*^~|[]{}!"
 
 -- | Parses an in-paragraph newline as a @Linebreak@ element.
 linebreak :: JiraParser Inline
@@ -87,8 +89,13 @@ symbol = Str . singleton <$> do
   <?> "symbol"
 
 --
--- Links and images
+-- Anchors, links and images
 --
+
+-- | Parses an anchor into an @Anchor@ element.
+anchor :: JiraParser Inline
+anchor = Anchor . pack . filter (/= ' ')
+  <$> try (string "{anchor:" *> noneOf "\n" `manyTill` char '}')
 
 -- | Parse image into an @Image@ element.
 image :: JiraParser Inline
