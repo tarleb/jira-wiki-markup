@@ -123,6 +123,13 @@ tests = testGroup "Inline"
         isLeft (parseJira strong "_emph_") @? "emph as strong"
       ]
 
+    , testCase "subscript" $
+      parseJira subscript "~multiple words~" @?=
+      Right (Subscript [Str "multiple", Space, Str "words"])
+
+    , testCase "superscript" $
+      parseJira superscript "^multiple words^" @?=
+      Right (Superscript [Str "multiple", Space, Str "words"])
     ]
 
   , testGroup "inline parser"

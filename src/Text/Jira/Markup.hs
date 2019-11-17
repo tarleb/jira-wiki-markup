@@ -30,6 +30,8 @@ data Inline
   | Str Text                 -- ^ simple, markup-less string
   | Space                    -- ^ space between words
   | Strong [Inline]          -- ^ strongly emphasized text
+  | Subscript [Inline]       -- ^ subscript text
+  | Superscript [Inline]     -- ^ superscript text
   deriving (Eq, Ord, Show)
 
 -- | Blocks of text.

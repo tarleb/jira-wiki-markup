@@ -19,6 +19,8 @@ module Text.Jira.Parser.Inline
   , linebreak
   , str
   , strong
+  , subscript
+  , superscript
   , whitespace
   ) where
 
@@ -37,6 +39,8 @@ inline = choice
   , linebreak
   , emph
   , strong
+  , subscript
+  , superscript
   , deleted
   , inserted
   , symbol
@@ -48,7 +52,7 @@ specialChars = " \n" ++ symbolChars
 
 -- | Special characters which can be part of a string.
 symbolChars :: String
-symbolChars = "_+-*|"
+symbolChars = "_+-*^~|"
 
 -- | Parses an in-paragraph newline as a @Linebreak@ element.
 linebreak :: JiraParser Inline
@@ -92,6 +96,14 @@ inserted = Inserted <$> ('+' `delimitingMany` inline) <?> "inserted"
 -- | Parses strongly emphasized text into @Strong@.
 strong :: JiraParser Inline
 strong = Strong <$> ('*' `delimitingMany` inline) <?> "strong"
+
+-- | Parses subscript text into @Subscript@.
+subscript :: JiraParser Inline
+subscript = Subscript <$> ('~' `delimitingMany` inline) <?> "subscript"
+
+-- | Parses superscript text into @Superscript@.
+superscript :: JiraParser Inline
+superscript = Superscript <$> ('^' `delimitingMany` inline) <?> "superscript"
 
 --
 -- Helpers
