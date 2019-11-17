@@ -12,6 +12,7 @@ Parse Jira wiki blocks.
 module Text.Jira.Parser.Block
   ( block
     -- * Parsers for block types
+  , blockQuote
   , code
   , header
   , list
@@ -35,6 +36,7 @@ block = choice
   [ header
   , list
   , table
+  , blockQuote
   , code
   , noformat
   , panel
@@ -53,7 +55,7 @@ para = (<?> "para") . try $ do
 header :: JiraParser Block
 header = (<?> "header") . try $ do
   level <- digitToInt <$> (char 'h' *> oneOf "123456" <* char '.')
-  content <- skipMany (char ' ') *> inline `manyTill` newline
+  content <- skipMany (char ' ') *> inline `manyTill` (void newline <|> eof)
   return $ Header level (normalizeInlines content)
 
 -- | Parses a list into @List@.
@@ -148,6 +150,17 @@ code = try $ do
   content <- anyChar `manyTill` try (string "{code}" *> blankline)
   return $ Code lang params (pack content)
 
+-- | Parses a block quote into a @'Quote'@ element.
+blockQuote :: JiraParser Block
+blockQuote = try $ singleLineBq <|> multiLineBq
+  where
+    singleLineBq = BlockQuote . (:[]) . Para <$>
+                   (string "bq. " *> skipMany (char ' ') *>
+                    inline `manyTill` (void newline <|> eof))
+    multiLineBq = BlockQuote <$>
+                  (string "{quote}" *> optional blankline *>
+                   block `manyTill` try (string "{quote}"))
+
 -- | Parses a preformatted text into a @NoFormat@ element.
 noformat :: JiraParser Block
 noformat = try $ do
@@ -161,7 +174,6 @@ panel = try $ do
   (_, params) <- string "{panel" *> parameters <* char '}' <* newline
   content <- block `manyTill` try (string "{panel}" *> blankline)
   return $ Panel params content
-
 
 -- | Parses a set of panel parameters
 parameters :: JiraParser (Language, [Parameter])

@@ -38,7 +38,7 @@ import Text.Parsec
 
 -- | Parses any inline element.
 inline :: JiraParser Inline
-inline = choice
+inline = notFollowedBy' blockEnd *> choice
   [ whitespace
   , str
   , linebreak
@@ -54,6 +54,8 @@ inline = choice
   , anchor
   , symbol
   ] <?> "inline"
+  where
+    blockEnd = char '{' *> choice (map string blockNames) <* char '}'
 
 -- | Characters with a special meaning, i.e., those used for markup.
 specialChars :: String

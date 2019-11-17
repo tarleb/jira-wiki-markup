@@ -286,6 +286,25 @@ tests = testGroup "Blocks"
         parseJira panel "{panel:title=test}\nline\n{panel}\n" @?=
         Right (Panel [Parameter "title" "test"] [Para [Str "line"]])
       ]
+
+    , testGroup "blockQuote"
+      [ testCase "single line quite before eof" $
+        parseJira blockQuote "bq. this text" @?=
+        Right (BlockQuote [Para [Str "this", Space, Str "text"]])
+
+      , testCase "single line blockquote" $
+        parseJira blockQuote "bq. this test\n" @?=
+        Right (BlockQuote [Para [Str "this", Space, Str "test"]])
+
+      , testCase "multi-paragraph block quote" $
+        parseJira blockQuote "{quote}\npara1\n\npara2\n{quote}\n" @?=
+        Right (BlockQuote [ Para [Str "para1"]
+                          , Para [Str "para2"]])
+
+      , testCase "condensed block quote" $
+        parseJira blockQuote "{quote}life is good{quote}\n" @?=
+        Right (BlockQuote [Para [Str "life", Space, Str "is", Space, Str "good"]])
+      ]
     ]
 
   , testGroup "block combinations"

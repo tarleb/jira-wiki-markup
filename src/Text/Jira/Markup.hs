@@ -44,6 +44,7 @@ data Inline
 -- | Blocks of text.
 data Block
   = Code Language [Parameter] Text      -- ^ Code block with panel parameters
+  | BlockQuote [Block]                  -- ^ Block of quoted content
   | Header Int [Inline]                 -- ^ Header with level and text
   | List ListStyle [[Block]]            -- ^ List
   | NoFormat [Parameter] Text           -- ^ Unformatted text
