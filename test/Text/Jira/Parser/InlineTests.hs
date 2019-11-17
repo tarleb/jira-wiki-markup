@@ -60,6 +60,31 @@ tests = testGroup "Inline"
         "newline is not considered whitespace"
       ]
 
+    , testGroup "emph"
+      [ testCase "single word" $
+        parseJira emph "_single_" @?= Right (Emph [Str "single"])
+
+      , testCase "multi word" $
+        parseJira emph "_multiple words_" @?=
+        Right (Emph [Str "multiple", Space, Str "words"])
+
+      , testCase "require space before opening underscore" $
+        isLeft (parseJira (str *> emph) "foo_bar_") @? "space after opening char"
+
+      , testCase "disallow space after opening underscore" $
+        isLeft (parseJira emph "_ nope_") @? "space after underscore"
+
+      , testCase "require word boundary after closing underscore" $
+        isLeft (parseJira emph "_nope_nope") @? "no boundary after closing"
+
+      , testCase "zero with space as word boundary" $
+        parseJira ((,) <$> emph <*> str) "_yup_\8203next" @?=
+        Right (Emph [Str "yup"], Str "\8203next")
+
+      , testCase "fails for strong" $
+        isLeft (parseJira emph "*strong*") @? "strong as emph"
+      ]
+
     , testGroup "linebreak"
       [ testCase "linebreak before text" $
         parseJira linebreak "\na" @?=

@@ -23,7 +23,8 @@ import Data.Text (Text)
 
 -- | Inline Jira markup elements.
 data Inline
-  = Linebreak                -- ^ hard linebreak
+  = Emph [Inline]            -- ^ emphasized text
+  | Linebreak                -- ^ hard linebreak
   | Str Text                 -- ^ simple, markup-less string
   | Space                    -- ^ space between words
   | Strong [Inline]          -- ^ strongly emphasized text
