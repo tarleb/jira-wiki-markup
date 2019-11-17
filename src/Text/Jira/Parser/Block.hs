@@ -16,6 +16,7 @@ module Text.Jira.Parser.Block
   , header
   , list
   , noformat
+  , panel
   , para
   , table
   ) where
@@ -37,6 +38,7 @@ block = choice
   , table
   , code
   , noformat
+  , panel
   , para
   ] <* skipWhitespace
 
@@ -154,6 +156,14 @@ noformat = try $ do
   (_, params) <- string "{noformat" *> parameters <* char '}' <* newline
   content <- anyChar `manyTill` try (string "{noformat}" *> blankline)
   return $ NoFormat params (pack content)
+
+-- | Parses a preformatted text into a @NoFormat@ element.
+panel :: JiraParser Block
+panel = try $ do
+  (_, params) <- string "{panel" *> parameters <* char '}' <* newline
+  content <- block `manyTill` try (string "{panel}" *> blankline)
+  return $ Panel params content
+
 
 -- | Parses a set of panel parameters
 parameters :: JiraParser (Language, [Parameter])

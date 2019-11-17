@@ -34,6 +34,7 @@ data Block
   | Header Int [Inline]                 -- ^ Header with level and text
   | List ListStyle [[Block]]            -- ^ List
   | NoFormat [Parameter] Text           -- ^ Unformatted text
+  | Panel [Parameter] [Block]           -- ^ Formatted panel
   | Para [Inline]                       -- ^ Paragraph of text
   | Table [Row]                         -- ^ Table
   deriving (Eq, Ord, Show)

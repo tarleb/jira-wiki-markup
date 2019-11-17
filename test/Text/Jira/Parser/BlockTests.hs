@@ -236,7 +236,7 @@ tests = testGroup "Blocks"
                                     , List SquareBullets [[Para [Str "bar"]]]]]])
       ]
 
-    , testGroup "Code"
+    , testGroup "code"
       [ testCase "no language" $
         parseJira code "{code}\nprint('Hi Mom!'){code}\n" @?=
         Right (Code (Language "java") [] "print('Hi Mom!')")
@@ -260,7 +260,7 @@ tests = testGroup "Blocks"
                "putStrLn \"Hello, World!\"")
       ]
 
-    , testGroup "NoFormat"
+    , testGroup "noformat"
       [ testCase "no parameters" $
         parseJira noformat "{noformat}\nline 1\nline 2{noformat}\n" @?=
         Right (NoFormat [] "line 1\nline 2")
@@ -268,6 +268,23 @@ tests = testGroup "Blocks"
       , testCase "with parameters" $
         parseJira noformat "{noformat:title=test}\nline 1\nline 2{noformat}\n" @?=
         Right (NoFormat [Parameter "title" "test"] "line 1\nline 2")
+      ]
+
+    , testGroup "panel"
+      [ testCase "two-line paragraph" $
+        parseJira panel "{panel}\nline 1\nline 2\n{panel}\n" @?=
+        Right (Panel [] [Para [Str "line", Space, Str "1", Linebreak,
+                               Str "line", Space, Str "2"]])
+
+      -- FIXME: the next two shouldn't require a blank line after the contents
+      , testCase "list" $
+        parseJira panel "{panel}\n* first\n* second\n\n{panel}\n" @?=
+        Right (Panel [] [List CircleBullets [ [Para [Str "first"]]
+                                            , [Para [Str "second"]]]])
+
+      , testCase "with parameters" $
+        parseJira panel "{panel:title=test}\nline\n{panel}\n" @?=
+        Right (Panel [Parameter "title" "test"] [Para [Str "line"]])
       ]
     ]
 

@@ -77,7 +77,8 @@ endOfPara = eof
     headerStart   = void $ char 'h' *> oneOf "123456" <* char '.'
     listItemStart = void $ many1 (oneOf "#*-") *> char ' '
     tableStart    = void $ skipSpaces *> many1 (char '|') *> char ' '
-    panelStart    = void $ char '{' *> (string "code" <|> string "noformat")
+    panelStart    = void $ char '{' *>
+                    choice (map string ["code", "noformat", "panel"])
 
 -- | Variant of parsec's @notFollowedBy@ function which properly fails even if
 -- the given parser does not consume any input (like @eof@ does).
