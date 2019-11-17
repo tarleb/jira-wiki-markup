@@ -13,6 +13,7 @@ module Text.Jira.Markup
   ( Block (..)
   , Inline (..)
   , ListStyle (..)
+  , URL (..)
   , Row (..)
   , Cell (..)
   , Language (..)
@@ -25,8 +26,10 @@ import Data.Text (Text)
 data Inline
   = Deleted [Inline]         -- ^ deleted (struk-out) text
   | Emph [Inline]            -- ^ emphasized text
+  | Image URL                -- ^ an image
   | Inserted [Inline]        -- ^ text marked as having been inserted
   | Linebreak                -- ^ hard linebreak
+  | Link [Inline] URL        -- ^ hyperlink with alias
   | Str Text                 -- ^ simple, markup-less string
   | Space                    -- ^ space between words
   | Strong [Inline]          -- ^ strongly emphasized text
@@ -50,6 +53,10 @@ data ListStyle
   = CircleBullets            -- ^ List with round bullets
   | SquareBullets            -- ^ List with square bullets
   | Enumeration              -- ^ Enumeration, i.e., numbered items
+  deriving (Eq, Ord, Show)
+
+-- | Unified resource location
+newtype URL = URL { fromURL :: Text }
   deriving (Eq, Ord, Show)
 
 -- | Table row, containing an arbitrary number of cells.

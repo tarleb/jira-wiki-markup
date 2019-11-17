@@ -130,11 +130,32 @@ tests = testGroup "Inline"
     , testCase "superscript" $
       parseJira superscript "^multiple words^" @?=
       Right (Superscript [Str "multiple", Space, Str "words"])
+
+    , testGroup "link"
+      [ testCase "unaliased link" $
+        parseJira link "[https://example.org]" @?=
+        Right (Link [] (URL "https://example.org"))
+
+      , testCase "aliased link" $
+        parseJira link "[Example|https://example.org]" @?=
+        Right (Link [Str "Example"] (URL "https://example.org"))
+
+      , testCase "alias with emphasis" $
+        parseJira link "[_important_ example|https://example.org]" @?=
+        Right (Link [Emph [Str "important"], Space, Str "example"]
+                (URL "https://example.org"))
+      ]
+
+    , testGroup "image"
+      [ testCase "local file" $
+        parseJira image "!image.jpg!" @?=
+        Right (Image (URL "image.jpg"))
+      ]
     ]
 
   , testGroup "inline parser"
     [ testCase "simple sentence" $
       parseJira (many1 inline) "Hello, World!" @?=
-      Right [Str "Hello,", Space, Str "World!"]
+      Right [Str "Hello,", Space, Str "World", Str "!"]
     ]
   ]

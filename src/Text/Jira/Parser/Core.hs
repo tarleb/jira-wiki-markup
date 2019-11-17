@@ -36,7 +36,8 @@ type JiraParser = Parsec Text ParserState
 
 -- | Parser state used to keep track of various parameteres.
 data ParserState = ParserState
-  { stateInList      :: Bool            -- ^ whether the parser is within a list
+  { stateInLink      :: Bool            -- ^ whether the parser is within a link
+  , stateInList      :: Bool            -- ^ whether the parser is within a list
   , stateInTable     :: Bool            -- ^ whether the parser is within a table
   , stateLastStrPos  :: Maybe SourcePos -- ^ position at which the last string
                                         --   ended
@@ -45,7 +46,8 @@ data ParserState = ParserState
 -- | Default parser state (i.e., start state)
 defaultState :: ParserState
 defaultState = ParserState
-  { stateInList      = False
+  { stateInLink      = False
+  , stateInList      = False
   , stateInTable     = False
   , stateLastStrPos  = Nothing
   }

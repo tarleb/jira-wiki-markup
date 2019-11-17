@@ -16,7 +16,9 @@ module Text.Jira.Parser.Inline
   , deleted
   , emph
   , inserted
+  , image
   , linebreak
+  , link
   , str
   , strong
   , subscript
@@ -26,6 +28,7 @@ module Text.Jira.Parser.Inline
 
 import Control.Monad (guard, void)
 import Data.Char (isLetter)
+import Data.Monoid (All (..))
 import Data.Text (pack, singleton)
 import Text.Jira.Markup
 import Text.Jira.Parser.Core
@@ -37,6 +40,8 @@ inline = choice
   [ whitespace
   , str
   , linebreak
+  , link
+  , image
   , emph
   , strong
   , subscript
@@ -52,7 +57,7 @@ specialChars = " \n" ++ symbolChars
 
 -- | Special characters which can be part of a string.
 symbolChars :: String
-symbolChars = "_+-*^~|"
+symbolChars = "_+-*^~|[]!"
 
 -- | Parses an in-paragraph newline as a @Linebreak@ element.
 linebreak :: JiraParser Inline
@@ -74,9 +79,32 @@ symbol :: JiraParser Inline
 symbol = Str . singleton <$> do
   inTablePred <- do
     b <- stateInTable <$> getState
-    return $ if b then (/= '|') else const True
-  oneOf $ filter inTablePred symbolChars
+    return $ if b then All . (/= '|') else mempty
+  inLinkPred  <- do
+    b <- stateInLink  <$> getState
+    return $ if b then All . (`notElem` ("]|\n" :: String)) else mempty
+  oneOf $ filter (getAll . (inTablePred <> inLinkPred)) symbolChars
   <?> "symbol"
+
+--
+-- Links and images
+--
+
+-- | Parse image into an @Image@ element.
+image :: JiraParser Inline
+image = fmap (Image . URL . pack) . try $
+  char '!' *> anyChar `manyTill` char '!'
+
+-- | Parse link into a @Link@ element.
+link :: JiraParser Inline
+link = try $ do
+  guard . not . stateInLink =<< getState
+  withStateFlag (\b st -> st { stateInLink = b }) $ do
+    _ <- char '['
+    alias <- option [] $ try (many inline <* char '|')
+    url   <- URL . pack <$> many1 (noneOf "|] \n")
+    _ <- char ']'
+    return $ Link alias url
 
 --
 -- Markup
