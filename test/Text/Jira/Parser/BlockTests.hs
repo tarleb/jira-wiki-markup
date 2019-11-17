@@ -259,6 +259,16 @@ tests = testGroup "Blocks"
                [Parameter "title" "Hello World"]
                "putStrLn \"Hello, World!\"")
       ]
+
+    , testGroup "NoFormat"
+      [ testCase "no parameters" $
+        parseJira noformat "{noformat}\nline 1\nline 2{noformat}\n" @?=
+        Right (NoFormat [] "line 1\nline 2")
+
+      , testCase "with parameters" $
+        parseJira noformat "{noformat:title=test}\nline 1\nline 2{noformat}\n" @?=
+        Right (NoFormat [Parameter "title" "test"] "line 1\nline 2")
+      ]
     ]
 
   , testGroup "block combinations"
@@ -301,6 +311,17 @@ tests = testGroup "Blocks"
     , testCase "para after code" $
       parseJira ((,) <$> block <*> block) "{code}\nfn(){code}\ntext" @?=
       Right ( Code (Language "java") [] "fn()"
+            , Para [Str "text"])
+
+    , testCase "para before noformat" $
+      parseJira ((,) <$> block <*> block)
+                 "wholesome\n{noformat}\nenjoy{noformat}\n" @?=
+      Right ( Para [Str "wholesome"]
+            , NoFormat [] "enjoy")
+
+    , testCase "para after noformat" $
+      parseJira ((,) <$> block <*> block) "{noformat}\nlala{noformat}\ntext" @?=
+      Right ( NoFormat [] "lala"
             , Para [Str "text"])
     ]
   ]

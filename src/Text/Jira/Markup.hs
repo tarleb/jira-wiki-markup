@@ -31,10 +31,11 @@ data Inline
 -- | Blocks of text.
 data Block
   = Code Language [Parameter] Text      -- ^ Code block with panel parameters
-  | Header Int [Inline]      -- ^ Header with level and text
-  | List ListStyle [[Block]] -- ^ List
-  | Para [Inline]            -- ^ Paragraph of text
-  | Table [Row]              -- ^ Table
+  | Header Int [Inline]                 -- ^ Header with level and text
+  | List ListStyle [[Block]]            -- ^ List
+  | NoFormat [Parameter] Text           -- ^ Unformatted text
+  | Para [Inline]                       -- ^ Paragraph of text
+  | Table [Row]                         -- ^ Table
   deriving (Eq, Ord, Show)
 
 -- | Style used for list items.
