@@ -30,7 +30,7 @@ module Text.Jira.Parser.Inline
 
 import Control.Monad (guard, void)
 import Data.Char (isLetter)
-import Data.Monoid (All (..))
+import Data.Monoid ((<>), All (..))
 import Data.Text (pack, singleton)
 import Text.Jira.Markup
 import Text.Jira.Parser.Core
