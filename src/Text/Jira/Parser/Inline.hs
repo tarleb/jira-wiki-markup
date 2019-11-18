@@ -16,6 +16,7 @@ module Text.Jira.Parser.Inline
   , anchor
   , deleted
   , emph
+  , entity
   , inserted
   , image
   , linebreak
@@ -52,6 +53,7 @@ inline = notFollowedBy' blockEnd *> choice
   , inserted
   , monospaced
   , anchor
+  , entity
   , symbol
   ] <?> "inline"
   where
@@ -63,7 +65,7 @@ specialChars = " \n" ++ symbolChars
 
 -- | Special characters which can be part of a string.
 symbolChars :: String
-symbolChars = "_+-*^~|[]{}!"
+symbolChars = "_+-*^~|[]{}!&"
 
 -- | Parses an in-paragraph newline as a @Linebreak@ element.
 linebreak :: JiraParser Inline
@@ -79,6 +81,14 @@ str :: JiraParser Inline
 str = Str . pack
   <$> (many1 (noneOf specialChars) <?> "string")
   <* updateLastStrPos
+
+-- | Parses an HTML entity into an @'Entity'@ element.
+entity :: JiraParser Inline
+entity = Entity . pack
+  <$> try (char '&' *> (numerical <|> named) <* char ';')
+  where
+    numerical = (:) <$> char '#' <*> many1 digit
+    named = many1 letter
 
 -- | Parses a special character symbol as a @Str@.
 symbol :: JiraParser Inline

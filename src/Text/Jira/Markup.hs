@@ -29,6 +29,7 @@ data Inline
   = Anchor Text              -- ^ anchor for internal links
   | Deleted [Inline]         -- ^ deleted (struk-out) text
   | Emph [Inline]            -- ^ emphasized text
+  | Entity Text              -- ^ named or numeric HTML entity
   | Image URL                -- ^ an image
   | Inserted [Inline]        -- ^ text marked as having been inserted
   | Linebreak                -- ^ hard linebreak

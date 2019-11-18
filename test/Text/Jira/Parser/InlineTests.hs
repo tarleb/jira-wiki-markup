@@ -60,6 +60,33 @@ tests = testGroup "Inline"
         "newline is not considered whitespace"
       ]
 
+    , testGroup "entity"
+      [ testCase "named entity" $
+        parseJira entity "&copy;" @?= Right (Entity "copy")
+
+      , testCase "numerical entity" $
+        parseJira entity "&#65;" @?= Right (Entity "#65")
+
+      , testCase "invalid entity" $
+        parseJira entity "&haskell;" @?= Right (Entity "haskell")
+
+      , testCase "space" $
+        isLeft (parseJira entity "&a b;") @?
+        "entities may not contain spaces"
+
+      , testCase "symbol" $
+        isLeft (parseJira entity "&a-b;") @?
+        "entities may not contain symbols"
+
+      , testCase "number without hash" $
+        isLeft (parseJira entity "&65;") @?
+        "numerical entities must start with &#"
+
+      , testCase "no name" $
+        isLeft (parseJira entity "&;") @?
+        "entities must not be empty"
+      ]
+
     , testCase "deleted" $
       parseJira deleted "-far-fetched-" @?=
       Right (Deleted [Str "far", Str "-", Str "fetched"])
@@ -165,5 +192,10 @@ tests = testGroup "Inline"
     [ testCase "simple sentence" $
       parseJira (many1 inline) "Hello, World!" @?=
       Right [Str "Hello,", Space, Str "World", Str "!"]
+
+    , testCase "with entity" $
+      parseJira (many1 inline) "shopping at P&amp;C" @?=
+      Right [ Str "shopping", Space, Str "at", Space
+            , Str "P", Entity "amp", Str "C"]
     ]
   ]
