@@ -78,9 +78,10 @@ whitespace = Space <$ skipMany1 (char ' ') <?> "whitespace"
 
 -- | Parses a simple, markup-less string into a @Str@ element.
 str :: JiraParser Inline
-str = Str . pack
-  <$> (many1 (noneOf specialChars) <?> "string")
-  <* updateLastStrPos
+str = Str . pack <$> (alphaNums <|> otherNonSpecialChars) <?> "string"
+  where
+    alphaNums = many1 alphaNum <* updateLastStrPos
+    otherNonSpecialChars = many1 (noneOf specialChars)
 
 -- | Parses an HTML entity into an @'Entity'@ element.
 entity :: JiraParser Inline

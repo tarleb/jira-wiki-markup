@@ -28,8 +28,8 @@ tests = testGroup "Inline"
       [ testCase "simple word" $
         parseJira str "word" @?= Right (Str "word")
 
-      , testCase "word with comma" $
-        parseJira str "comma," @?= Right (Str "comma,")
+      , testCase "non-special symbols" $
+        parseJira str ",.;#%" @?= Right (Str ",.;#%")
 
       , testCase "umlauts" $
         parseJira str "äéíöüßðå" @?= Right (Str "äéíöüßðå")
@@ -99,7 +99,11 @@ tests = testGroup "Inline"
         parseJira emph "_multiple words_" @?=
         Right (Emph [Str "multiple", Space, Str "words"])
 
-      , testCase "require space before opening underscore" $
+      , testCase "symbol before opening underscore" $
+        parseJira (str *> emph) "#_bar_" @?=
+        Right (Emph [Str "bar"])
+
+      , testCase "neither symbol nor space before opening underscore" $
         isLeft (parseJira (str *> emph) "foo_bar_") @? "space after opening char"
 
       , testCase "disallow space after opening underscore" $
@@ -194,8 +198,8 @@ tests = testGroup "Inline"
 
   , testGroup "inline parser"
     [ testCase "simple sentence" $
-      parseJira (many1 inline) "Hello, World!" @?=
-      Right [Str "Hello,", Space, Str "World", Str "!"]
+      parseJira (normalizeInlines <$> many1 inline) "Hello, World!" @?=
+      Right [Str "Hello,", Space, Str "World!"]
 
     , testCase "with entity" $
       parseJira (many1 inline) "shopping at P&amp;C" @?=
