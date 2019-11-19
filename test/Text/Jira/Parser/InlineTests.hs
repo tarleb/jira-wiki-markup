@@ -213,5 +213,9 @@ tests = testGroup "Inline"
       parseJira (many1 inline) "shopping at P&amp;C" @?=
       Right [ Str "shopping", Space, Str "at", Space
             , Str "P", Entity "amp", Str "C"]
+
+    , testCase "backslash-escaped char" $
+      parseJira (normalizeInlines <$> many1 inline) "opening brace: \\{" @?=
+      Right [ Str "opening", Space, Str "brace:", Space, Str "{"]
     ]
   ]

@@ -66,7 +66,7 @@ specialChars = " \n" ++ symbolChars
 
 -- | Special characters which can be part of a string.
 symbolChars :: String
-symbolChars = "_+-*^~|[]{}!&"
+symbolChars = "_+-*^~|[]{}!&\\"
 
 -- | Parses an in-paragraph newline as a @Linebreak@ element.
 linebreak :: JiraParser Inline
