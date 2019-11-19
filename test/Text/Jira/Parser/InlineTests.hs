@@ -39,6 +39,14 @@ tests = testGroup "Inline"
         "str should only be parsed into Space"
       ]
 
+    , testGroup "symbol"
+      [ testCase "special symbol" $
+        parseJira symbol "!" @?= Right (Str "!")
+
+      , testCase "escaped symbol" $
+        parseJira symbol "\\{" @?= Right (Str "{")
+      ]
+
     , testGroup "whitespace"
       [ testCase "space" $
         parseJira whitespace " " @?= Right Space

@@ -26,6 +26,7 @@ module Text.Jira.Parser.Inline
   , strong
   , subscript
   , superscript
+  , symbol
   , whitespace
   ) where
 
@@ -93,15 +94,20 @@ entity = Entity . pack
 
 -- | Parses a special character symbol as a @Str@.
 symbol :: JiraParser Inline
-symbol = Str . singleton <$> do
-  inTablePred <- do
-    b <- stateInTable <$> getState
-    return $ if b then All . (/= '|') else mempty
-  inLinkPred  <- do
-    b <- stateInLink  <$> getState
-    return $ if b then All . (`notElem` ("]|\n" :: String)) else mempty
-  oneOf $ filter (getAll . (inTablePred <> inLinkPred)) symbolChars
+symbol = Str . singleton <$> (escapedChar <|> symbolChar)
   <?> "symbol"
+  where
+    escapedChar = try (char '\\' *> oneOf symbolChars)
+
+    symbolChar = do
+      inTablePred <- do
+        b <- stateInTable <$> getState
+        return $ if b then All . (/= '|') else mempty
+      inLinkPred  <- do
+        b <- stateInLink  <$> getState
+        return $ if b then All . (`notElem` ("]|\n" :: String)) else mempty
+      oneOf $ filter (getAll . (inTablePred <> inLinkPred)) symbolChars
+
 
 --
 -- Anchors, links and images
