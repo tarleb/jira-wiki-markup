@@ -185,6 +185,10 @@ tests = testGroup "Inline"
       [ testCase "local file" $
         parseJira image "!image.jpg!" @?=
         Right (Image (URL "image.jpg"))
+
+      , testCase "no newlines" $
+        isLeft (parseJira image "!hello\nworld.png!") @?
+        "no newlines in image names"
       ]
     ]
 
