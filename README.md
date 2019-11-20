@@ -7,4 +7,11 @@
 [![Build status](https://travis-ci.com/tarleb/jira-wiki-markup.svg?branch=master)](https://travis-ci.com/tarleb/jira-wiki-markup)
 [![Windows build status](https://ci.appveyor.com/api/projects/status/github/tarleb/jira-wiki-markup?branch=master&svg=true)](https://ci.appveyor.com/project/tarleb/jira-wiki-markup)
 
-Handle Jira wiki markup
+This package provides a parser for [Jira wiki markup]. It converts the
+raw text into an abstract syntax tree. The tree is easy to handle and to
+different to different output formats.
+
+# License
+
+This package is licensed under the MIT license. See the `LICENSE` file
+for details.
