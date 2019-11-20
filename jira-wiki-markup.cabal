@@ -2,7 +2,8 @@ cabal-version:       2.0
 name:                jira-wiki-markup
 version:             0.1.0
 synopsis:            Handle Jira wiki markup
-description:         Handle Jira wiki markup
+description:         Parse jira wiki text into an abstract syntax tree for easy
+                     transformation to other formats.
 homepage:            https://github.com/tarleb/jira-wiki-markup
 bug-reports:         https://github.com/tarleb/jira-wiki-markup/issues
 license:             MIT
