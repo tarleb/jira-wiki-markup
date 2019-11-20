@@ -11,6 +11,7 @@ Parse Jira wiki markup.
 -}
 module Text.Jira.Parser
   ( parse
+  , doc
   , module Text.Jira.Markup
   , module Text.Jira.Parser.Core
   , module Text.Jira.Parser.Inline
@@ -24,6 +25,10 @@ import Text.Jira.Parser.Core
 import Text.Jira.Parser.Inline
 import Text.Parsec hiding (parse)
 
--- | Parses a document into a list of blocks.
-parse :: Text -> Either ParseError [Block]
-parse = parseJira (many1 block)
+-- | Parses a document into a Jira AST.
+parse :: Text -> Either ParseError Doc
+parse = parseJira doc
+
+-- | Parses a list of jira blocks into a @'Doc'@ element.
+doc :: JiraParser Doc
+doc = Doc <$> many block <?> "doc"

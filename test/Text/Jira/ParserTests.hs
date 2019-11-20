@@ -13,6 +13,8 @@ module Text.Jira.ParserTests (tests) where
 
 import Data.Text ()
 import Test.Tasty (TestTree, testGroup)
+import Test.Tasty.HUnit (testCase, (@?=))
+import Text.Jira.Parser
 import qualified Text.Jira.Parser.BlockTests
 import qualified Text.Jira.Parser.InlineTests
 
@@ -20,4 +22,14 @@ tests :: TestTree
 tests = testGroup "Parser"
   [ Text.Jira.Parser.InlineTests.tests
   , Text.Jira.Parser.BlockTests.tests
+  , testGroup "doc"
+    [ testCase "empty document" $
+      parse "" @?=
+      Right (Doc [])
+
+    , testCase "simple document" $
+      parse "h1. test\nThis is ok." @?=
+      Right (Doc [ Header 1 [Str "test"]
+                 , Para [Str "This", Space, Str "is", Space, Str "ok."]])
+    ]
   ]

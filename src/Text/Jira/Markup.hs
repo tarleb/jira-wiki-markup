@@ -11,7 +11,8 @@ Portability : portable
 Jira markup types.
 -}
 module Text.Jira.Markup
-  ( Block (..)
+  ( Doc (..)
+  , Block (..)
   , Inline (..)
   , ListStyle (..)
   , URL (..)
@@ -23,6 +24,10 @@ module Text.Jira.Markup
   ) where
 
 import Data.Text (Text, append)
+
+-- | Jira document
+newtype Doc = Doc { fromDoc :: [Block] }
+  deriving (Eq, Ord, Show)
 
 -- | Inline Jira markup elements.
 data Inline
