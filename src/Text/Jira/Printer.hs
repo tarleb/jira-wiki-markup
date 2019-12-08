@@ -14,6 +14,8 @@ Generate Jira wiki markup text from an abstract syntax tree.
 module Text.Jira.Printer
   ( pretty
   , renderBlock
+  , prettyBlocks
+  , prettyInlines
   , JiraPrinter
   , PrinterState (..)
   , startState
@@ -31,7 +33,15 @@ import qualified Data.Text as T
 
 -- | Render Jira document as Jira wiki formatted text.
 pretty :: Doc -> Text
-pretty (Doc blks) = evalState (renderBlocks blks) startState
+pretty (Doc blks) = prettyBlocks blks
+
+-- | Render a list of Jira blocks as Jira wiki formatted text.
+prettyBlocks :: [Block] -> Text
+prettyBlocks blks = evalState (renderBlocks blks) startState
+
+-- | Render a list of Jira inlines as Jira wiki formatted text.
+prettyInlines :: [Inline] -> Text
+prettyInlines = renderInlines
 
 -- | Internal state used by the printer.
 newtype PrinterState = PrinterState
