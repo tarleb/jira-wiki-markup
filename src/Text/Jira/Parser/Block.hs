@@ -15,6 +15,7 @@ module Text.Jira.Parser.Block
   , blockQuote
   , code
   , header
+  , horizontalRule
   , list
   , noformat
   , panel
@@ -37,6 +38,7 @@ block = choice
   , list
   , table
   , blockQuote
+  , horizontalRule
   , code
   , noformat
   , panel
@@ -47,8 +49,9 @@ block = choice
 para :: JiraParser Block
 para = (<?> "para") . try $ do
   isInList <- stateInList <$> getState
-  when isInList $
+  when isInList $ do
     notFollowedBy' blankline
+    notFollowedBy' horizontalRule
   Para . normalizeInlines <$> many1 inline
 
 -- | Parses a header line into a @Header@.
@@ -160,6 +163,11 @@ blockQuote = try $ singleLineBq <|> multiLineBq
     multiLineBq = BlockQuote <$>
                   (string "{quote}" *> optional blankline *>
                    block `manyTill` try (string "{quote}"))
+
+-- | Parses four consecutive hyphens as @'HorizontalRule'@.
+horizontalRule :: JiraParser Block
+horizontalRule = HorizontalRule <$
+  try (string "----" *> blankline)
 
 -- | Parses a preformatted text into a @NoFormat@ element.
 noformat :: JiraParser Block

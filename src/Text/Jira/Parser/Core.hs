@@ -93,14 +93,16 @@ endOfPara :: JiraParser ()
 endOfPara = eof
   <|> lookAhead blankline
   <|> lookAhead headerStart
+  <|> lookAhead horizontalRule
   <|> lookAhead listItemStart
   <|> lookAhead tableStart
   <|> lookAhead panelStart
   where
-    headerStart   = void $ char 'h' *> oneOf "123456" <* char '.'
-    listItemStart = void $ many1 (oneOf "#*-") *> char ' '
-    tableStart    = void $ skipSpaces *> many1 (char '|') *> char ' '
-    panelStart    = void $ char '{' *> choice (map string blockNames)
+    headerStart    = void $ char 'h' *> oneOf "123456" <* char '.'
+    listItemStart  = void $ many1 (oneOf "#*-") <* char ' '
+    tableStart     = void $ skipSpaces *> many1 (char '|') *> char ' '
+    panelStart     = void $ char '{' *> choice (map string blockNames)
+    horizontalRule = void $ try (string "----") *> blankline
 
 blockNames :: [String]
 blockNames = ["code", "noformat", "panel", "quote"]

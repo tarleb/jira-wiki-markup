@@ -31,20 +31,20 @@ newtype Doc = Doc { fromDoc :: [Block] }
 
 -- | Inline Jira markup elements.
 data Inline
-  = Anchor Text              -- ^ anchor for internal links
-  | Deleted [Inline]         -- ^ deleted (struk-out) text
-  | Emph [Inline]            -- ^ emphasized text
-  | Entity Text              -- ^ named or numeric HTML entity
-  | Image URL                -- ^ an image
-  | Inserted [Inline]        -- ^ text marked as having been inserted
-  | Linebreak                -- ^ hard linebreak
-  | Link [Inline] URL        -- ^ hyperlink with alias
-  | Monospaced [Inline]      -- ^ text rendered with monospaced font
-  | Str Text                 -- ^ simple, markup-less string
-  | Space                    -- ^ space between words
-  | Strong [Inline]          -- ^ strongly emphasized text
-  | Subscript [Inline]       -- ^ subscript text
-  | Superscript [Inline]     -- ^ superscript text
+  = Anchor Text                         -- ^ anchor for internal links
+  | Deleted [Inline]                    -- ^ deleted (struk-out) text
+  | Emph [Inline]                       -- ^ emphasized text
+  | Entity Text                         -- ^ named or numeric HTML entity
+  | Image URL                           -- ^ an image
+  | Inserted [Inline]                   -- ^ text marked as having been inserted
+  | Linebreak                           -- ^ hard linebreak
+  | Link [Inline] URL                   -- ^ hyperlink with alias
+  | Monospaced [Inline]                 -- ^ text rendered with monospaced font
+  | Str Text                            -- ^ simple, markup-less string
+  | Space                               -- ^ space between words
+  | Strong [Inline]                     -- ^ strongly emphasized text
+  | Subscript [Inline]                  -- ^ subscript text
+  | Superscript [Inline]                -- ^ superscript text
   deriving (Eq, Ord, Show)
 
 -- | Blocks of text.
@@ -52,6 +52,7 @@ data Block
   = Code Language [Parameter] Text      -- ^ Code block with panel parameters
   | BlockQuote [Block]                  -- ^ Block of quoted content
   | Header Int [Inline]                 -- ^ Header with level and text
+  | HorizontalRule                      -- ^ horizontal ruler
   | List ListStyle [[Block]]            -- ^ List
   | NoFormat [Parameter] Text           -- ^ Unformatted text
   | Panel [Parameter] [Block]           -- ^ Formatted panel
@@ -61,9 +62,9 @@ data Block
 
 -- | Style used for list items.
 data ListStyle
-  = CircleBullets            -- ^ List with round bullets
-  | SquareBullets            -- ^ List with square bullets
-  | Enumeration              -- ^ Enumeration, i.e., numbered items
+  = CircleBullets                       -- ^ List with round bullets
+  | SquareBullets                       -- ^ List with square bullets
+  | Enumeration                         -- ^ Enumeration, i.e., numbered items
   deriving (Eq, Ord, Show)
 
 -- | Unified resource location

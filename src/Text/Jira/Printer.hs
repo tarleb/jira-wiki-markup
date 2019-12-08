@@ -93,6 +93,7 @@ renderBlock = \case
                               [ "h",  T.pack (show lvl), ". "
                               , renderInlines inlines
                               ]
+  HorizontalRule           -> return "----"
   List style items         -> listWithMarker items (styleChar style)
   NoFormat params content  -> return $ mconcat
                               [ "{noformat"

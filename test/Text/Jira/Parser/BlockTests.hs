@@ -45,6 +45,10 @@ tests = testGroup "Blocks"
       , testCase "ended by blank line" $
         parseJira para "Hello\n\n" @?=
         Right (Para [Str "Hello"])
+
+      , testCase "deleted text after linebreak" $
+        parseJira para "foo\n-deleted-\n" @?=
+        Right (Para [Str "foo", Linebreak, Deleted [Str "deleted"]])
       ]
 
     , testGroup "header"
@@ -76,6 +80,12 @@ tests = testGroup "Blocks"
 
       , testCase "leading spaces are disallowed" $
         isLeft (parseJira header " h1. nope\n") @? "leading spaces"
+      ]
+
+    , testGroup "horizontalRule"
+      [ testCase "single ruler" $
+        parseJira horizontalRule "----\n" @?=
+        Right HorizontalRule
       ]
 
     , testGroup "list"
@@ -319,6 +329,14 @@ tests = testGroup "Blocks"
     , testCase "para after header" $
       parseJira ((,) <$> block <*> block) "h2.header\nparagraph\n" @?=
       Right (Header 2 [Str "header"], Para [Str "paragraph"])
+
+    , testCase "para before horizontal rule " $
+      parseJira ((,) <$> block <*> return HorizontalRule) "paragraph\n----\n" @?=
+      Right (Para [Str "paragraph"], HorizontalRule)
+
+    , testCase "para after horizontal rule " $
+      parseJira ((,) <$> block <*> block) "----\nparagraph\n" @?=
+      Right (HorizontalRule, Para [Str "paragraph"])
 
     , testCase "para after list" $
       parseJira ((,) <$> block <*> block) "* foo\n\nbar\n" @?=

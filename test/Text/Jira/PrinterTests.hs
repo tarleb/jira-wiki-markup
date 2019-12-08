@@ -38,6 +38,9 @@ tests = testGroup "Printer"
         let header = Header 5 [Str "test", Space, Str "header"]
         in renderBlock' header @?= "h5. test header"
       ]
+
+    , testCase "horizontal rule" $
+      renderBlock' HorizontalRule @?= "----"
     ]
   ]
 
