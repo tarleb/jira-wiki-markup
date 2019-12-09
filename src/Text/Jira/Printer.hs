@@ -14,6 +14,7 @@ Generate Jira wiki markup text from an abstract syntax tree.
 module Text.Jira.Printer
   ( pretty
   , renderBlock
+  , renderInline
   , prettyBlocks
   , prettyInlines
   , JiraPrinter
@@ -172,6 +173,7 @@ renderInline = \case
   Link inlines (URL url) -> "[" <> renderInlines inlines <> "|" <> url <> "]"
   Monospaced inlines     -> "{{" <> renderInlines inlines <> "}}"
   Space                  -> " "
+  SpecialChar c          -> "\\" `T.snoc` c
   Str txt                -> txt
   Strong inlines         -> renderWrapped '*' inlines
   Subscript inlines      -> renderWrapped '~' inlines

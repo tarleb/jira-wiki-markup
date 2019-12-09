@@ -33,7 +33,7 @@ module Text.Jira.Parser.Inline
 import Control.Monad (guard, void)
 import Data.Char (isLetter)
 import Data.Monoid ((<>), All (..))
-import Data.Text (pack, singleton)
+import Data.Text (pack)
 import Text.Jira.Markup
 import Text.Jira.Parser.Core
 import Text.Parsec
@@ -94,7 +94,7 @@ entity = Entity . pack
 
 -- | Parses a special character symbol as a @Str@.
 symbol :: JiraParser Inline
-symbol = Str . singleton <$> (escapedChar <|> symbolChar)
+symbol = SpecialChar <$> (escapedChar <|> symbolChar)
   <?> "symbol"
   where
     escapedChar = try (char '\\' *> oneOf symbolChars)

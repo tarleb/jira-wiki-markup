@@ -41,10 +41,10 @@ tests = testGroup "Inline"
 
     , testGroup "symbol"
       [ testCase "special symbol" $
-        parseJira symbol "!" @?= Right (Str "!")
+        parseJira symbol "!" @?= Right (SpecialChar '!')
 
       , testCase "escaped symbol" $
-        parseJira symbol "\\{" @?= Right (Str "{")
+        parseJira symbol "\\{" @?= Right (SpecialChar '{')
       ]
 
     , testGroup "whitespace"
@@ -97,7 +97,7 @@ tests = testGroup "Inline"
 
     , testCase "deleted" $
       parseJira deleted "-far-fetched-" @?=
-      Right (Deleted [Str "far", Str "-", Str "fetched"])
+      Right (Deleted [Str "far", SpecialChar '-', Str "fetched"])
 
     , testGroup "emph"
       [ testCase "single word" $
@@ -207,7 +207,7 @@ tests = testGroup "Inline"
   , testGroup "inline parser"
     [ testCase "simple sentence" $
       parseJira (normalizeInlines <$> many1 inline) "Hello, World!" @?=
-      Right [Str "Hello,", Space, Str "World!"]
+      Right [Str "Hello,", Space, Str "World", SpecialChar '!']
 
     , testCase "with entity" $
       parseJira (many1 inline) "shopping at P&amp;C" @?=
@@ -216,6 +216,6 @@ tests = testGroup "Inline"
 
     , testCase "backslash-escaped char" $
       parseJira (normalizeInlines <$> many1 inline) "opening brace: \\{" @?=
-      Right [ Str "opening", Space, Str "brace:", Space, Str "{"]
+      Right [ Str "opening", Space, Str "brace:", Space, SpecialChar '{']
     ]
   ]

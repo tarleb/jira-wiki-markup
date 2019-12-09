@@ -41,6 +41,12 @@ tests = testGroup "Printer"
 
     , testCase "horizontal rule" $
       renderBlock' HorizontalRule @?= "----"
+
+    ]
+
+  , testGroup "inlines"
+    [ testCase "SpecialChar" $
+      renderInline (SpecialChar '*') @?= "\\*"
     ]
   ]
 
