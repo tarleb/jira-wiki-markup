@@ -16,10 +16,12 @@ module Text.Jira.Markup
   , Inline (..)
   , ListStyle (..)
   , URL (..)
+  , Icon (..)
   , Row (..)
   , Cell (..)
   , Language (..)
   , Parameter (..)
+  , iconText
   , normalizeInlines
   ) where
 
@@ -33,6 +35,7 @@ newtype Doc = Doc { fromDoc :: [Block] }
 data Inline
   = Anchor Text                         -- ^ anchor for internal links
   | Deleted [Inline]                    -- ^ deleted (struk-out) text
+  | Emoji Icon                          -- ^ emoticon
   | Emph [Inline]                       -- ^ emphasized text
   | Entity Text                         -- ^ named or numeric HTML entity
   | Image URL                           -- ^ an image
@@ -92,6 +95,33 @@ data Parameter = Parameter
   , parameterValue :: Text
   } deriving (Eq, Ord, Show)
 
+-- | Graphical emoticons
+data Icon
+  = IconSlightlySmiling
+  | IconFrowning
+  | IconTongue
+  | IconSmiling
+  | IconWinking
+  | IconThumbsUp
+  | IconThumbsDown
+  | IconInfo
+  | IconCheckmark
+  | IconX
+  | IconAttention
+  | IconPlus
+  | IconMinus
+  | IconQuestionmark
+  | IconOn
+  | IconOff
+  | IconStar
+  | IconStarRed
+  | IconStarGreen
+  | IconStarBlue
+  | IconStarYellow
+  | IconFlag
+  | IconFlagOff
+  deriving (Enum, Eq, Ord, Show)
+
 -- | Normalize a list of inlines, merging elements where possible.
 normalizeInlines :: [Inline] -> [Inline]
 normalizeInlines = \case
@@ -103,3 +133,30 @@ normalizeInlines = \case
   Linebreak : Space : xs -> Linebreak : normalizeInlines xs
   Str s1 : Str s2 : xs   -> Str (s1 `append` s2) : normalizeInlines xs
   x : xs                 -> x : normalizeInlines xs
+
+-- | Gets the characters used to represent an emoji.
+iconText :: Icon -> Text
+iconText = \case
+  IconSlightlySmiling -> ":)"
+  IconFrowning        -> ":("
+  IconTongue          -> ":P"
+  IconSmiling         -> ":D"
+  IconWinking         -> ";)"
+  IconThumbsUp        -> "(y)"
+  IconThumbsDown      -> "(n)"
+  IconInfo            -> "(i)"
+  IconCheckmark       -> "(/)"
+  IconX               -> "(x)"
+  IconAttention       -> "(!)"
+  IconPlus            -> "(+)"
+  IconMinus           -> "(-)"
+  IconQuestionmark    -> "(?)"
+  IconOn              -> "(on)"
+  IconOff             -> "(off)"
+  IconStar            -> "(*)"
+  IconStarRed         -> "(*r)"
+  IconStarGreen       -> "(*g)"
+  IconStarBlue        -> "(*b)"
+  IconStarYellow      -> "(*y)"
+  IconFlag            -> "(flag)"
+  IconFlagOff         -> "(flagoff)"

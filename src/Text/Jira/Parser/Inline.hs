@@ -1,3 +1,5 @@
+{-# LANGUAGE CPP #-}
+{-# LANGUAGE LambdaCase #-}
 {-|
 Module      : Text.Jira.Parser.Inline
 Copyright   : © 2019 Albert Krewinkel
@@ -15,6 +17,7 @@ module Text.Jira.Parser.Inline
     -- * Inline component parsers
   , anchor
   , deleted
+  , emoji
   , emph
   , entity
   , inserted
@@ -31,8 +34,12 @@ module Text.Jira.Parser.Inline
   ) where
 
 import Control.Monad (guard, void)
-import Data.Char (isLetter)
+import Data.Char (isLetter, isPunctuation)
+#if !MIN_VERSION_base(4,13,0)
 import Data.Monoid ((<>), All (..))
+#else
+import Data.Monoid (All (..))
+#endif
 import Data.Text (pack)
 import Text.Jira.Markup
 import Text.Jira.Parser.Core
@@ -42,6 +49,7 @@ import Text.Parsec
 inline :: JiraParser Inline
 inline = notFollowedBy' blockEnd *> choice
   [ whitespace
+  , emoji
   , str
   , linebreak
   , link
@@ -66,7 +74,7 @@ specialChars = " \n" ++ symbolChars
 
 -- | Special characters which can be part of a string.
 symbolChars :: String
-symbolChars = "_+-*^~|[]{}!&\\"
+symbolChars = "_+-*^~|[]{}(!&\\"
 
 -- | Parses an in-paragraph newline as a @Linebreak@ element.
 linebreak :: JiraParser Inline
@@ -92,12 +100,52 @@ entity = Entity . pack
     numerical = (:) <$> char '#' <*> many1 digit
     named = many1 letter
 
+-- | Parses textual representation of an icon into an @'Emoji'@ element.
+emoji :: JiraParser Inline
+emoji = Emoji <$> (smiley <|> icon) <* notFollowedBy' letter <?> "emoji"
+  where
+    smiley = try $ choice
+      [ IconWinking <$ string ";)"
+      , char ':' *> anyChar >>= \case
+          'D' -> pure IconSmiling
+          ')' -> pure IconSlightlySmiling
+          '(' -> pure IconFrowning
+          'P' -> pure IconTongue
+          c   -> fail ("unknown smiley: :" ++ [c])
+      ]
+
+    icon = try $ do
+      let isIconChar c = isLetter c || (c `elem` ("/!+-?*" :: String))
+      name <- char '('
+              *> many1 (satisfy isIconChar)
+              <* char ')'
+      case name of
+        "y"       -> pure IconThumbsUp
+        "n"       -> pure IconThumbsDown
+        "i"       -> pure IconInfo
+        "/"       -> pure IconCheckmark
+        "x"       -> pure IconX
+        "!"       -> pure IconAttention
+        "+"       -> pure IconPlus
+        "-"       -> pure IconMinus
+        "?"       -> pure IconQuestionmark
+        "on"      -> pure IconOn
+        "off"     -> pure IconOff
+        "*"       -> pure IconStar
+        "*r"      -> pure IconStarRed
+        "*g"      -> pure IconStarGreen
+        "*b"      -> pure IconStarBlue
+        "*y"      -> pure IconStarYellow
+        "flag"    -> pure IconFlag
+        "flagoff" -> pure IconFlagOff
+        _         -> fail ("not a known emoji" <> name)
+
 -- | Parses a special character symbol as a @Str@.
 symbol :: JiraParser Inline
 symbol = SpecialChar <$> (escapedChar <|> symbolChar)
   <?> "symbol"
   where
-    escapedChar = try (char '\\' *> oneOf symbolChars)
+    escapedChar = try (char '\\' *> satisfy isPunctuation)
 
     symbolChar = do
       inTablePred <- do

@@ -47,6 +47,9 @@ tests = testGroup "Printer"
   , testGroup "inlines"
     [ testCase "SpecialChar" $
       renderInline (SpecialChar '*') @?= "\\*"
+
+    , testCase "Emoji" $
+      renderInline (Emoji IconSmiling) @?= ":D"
     ]
   ]
 

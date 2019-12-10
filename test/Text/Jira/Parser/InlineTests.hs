@@ -47,6 +47,29 @@ tests = testGroup "Inline"
         parseJira symbol "\\{" @?= Right (SpecialChar '{')
       ]
 
+    , testGroup "emoji"
+      [ testCase "smiling face" $
+        parseJira emoji ":D" @?= Right (Emoji IconSmiling)
+
+      , testCase "winking face" $
+        parseJira emoji ";)" @?= Right (Emoji IconWinking)
+
+      , testCase "checkmark" $
+        parseJira emoji "(/)" @?= Right (Emoji IconCheckmark)
+
+      , testCase "red x" $
+        parseJira emoji "(x)" @?= Right (Emoji IconX)
+
+      , testCase "thumbs up" $
+        parseJira emoji "(y)" @?= Right (Emoji IconThumbsUp)
+
+      , testCase "green star" $
+        parseJira emoji "(*g)" @?= Right (Emoji IconStarGreen)
+
+      , testCase "may not be followed by a letter" $
+        isLeft (parseJira emoji "(x)nope") @? "no letters after emojis"
+      ]
+
     , testGroup "whitespace"
       [ testCase "space" $
         parseJira whitespace " " @?= Right Space
@@ -212,10 +235,27 @@ tests = testGroup "Inline"
     , testCase "with entity" $
       parseJira (many1 inline) "shopping at P&amp;C" @?=
       Right [ Str "shopping", Space, Str "at", Space
-            , Str "P", Entity "amp", Str "C"]
+            , Str "P", Entity "amp", Str "C"
+            ]
 
     , testCase "backslash-escaped char" $
       parseJira (normalizeInlines <$> many1 inline) "opening brace: \\{" @?=
-      Right [ Str "opening", Space, Str "brace:", Space, SpecialChar '{']
+      Right [Str "opening", Space, Str "brace:", Space, SpecialChar '{']
+
+    , testCase "icon after word" $
+      parseJira (many1 inline) "checkmark(/)" @?=
+      Right [Str "checkmark", Emoji IconCheckmark]
+
+    , testCase "smiley after word" $
+      parseJira (normalizeInlines <$> many1 inline) "smiley:)" @?=
+      Right [Str "smiley", Emoji IconSlightlySmiling]
+
+    , testCase "escaped smiley after word" $
+      parseJira (normalizeInlines <$> many1 inline) "closing paren\\:)" @?=
+      Right [Str "closing", Space, Str "paren", SpecialChar ':', Str ")"]
+
+    , testCase "smiley between words" $
+      parseJira (normalizeInlines <$> many1 inline) "verdict: :D funny" @?=
+      Right [Str "verdict:", Space, Emoji IconSmiling, Space, Str "funny"]
     ]
   ]

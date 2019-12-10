@@ -166,8 +166,9 @@ renderInline = \case
   Anchor name            -> "{anchor:" <> name <> "}"
   Deleted inlines        -> renderWrapped '-' inlines
   Emph inlines           -> renderWrapped '_' inlines
-  Inserted inlines       -> renderWrapped '+' inlines
+  Emoji icon             -> iconText icon
   Entity entity          -> "&" <> entity <> ";"
+  Inserted inlines       -> renderWrapped '+' inlines
   Image (URL url)        -> "!" <> url <> "!"
   Linebreak              -> "\n"
   Link inlines (URL url) -> "[" <> renderInlines inlines <> "|" <> url <> "]"
