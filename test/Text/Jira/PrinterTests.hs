@@ -44,13 +44,20 @@ tests = testGroup "Printer"
 
     ]
 
-  , testGroup "isolated inline rendering"
+  , testGroup "isolated inline"
     [ testCase "SpecialChar" $
       renderInline (SpecialChar '*') @?= "\\*"
 
     , testCase "Emoji" $
       renderInline (Emoji IconSmiling) @?= ":D"
 
+    , testCase "Styled Emphasis" $
+      renderInline (Styled Emphasis [Str "Hello,", Space, Str "World!"]) @?=
+      "_Hello, World!_"
+
+    , testCase "Styled Strong" $
+      renderInline (Styled Strong [Str "Hello,", Space, Str "World!"]) @?=
+      "*Hello, World!*"
     ]
 
   , testGroup "combined inlines"
@@ -61,6 +68,10 @@ tests = testGroup "Printer"
     , testCase "special char before word" $
       prettyInlines [SpecialChar '*', Str "star"] @?=
       "\\*star"
+
+    , testCase "markup within word" $
+      prettyInlines [Str "H", Styled Subscript [Str "2"], Str "O"] @?=
+      "H{~}2{~}O"
     ]
   ]
 

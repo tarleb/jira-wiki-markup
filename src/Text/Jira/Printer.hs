@@ -45,11 +45,12 @@ prettyInlines :: [Inline] -> Text
 prettyInlines = \case
   [] ->
     ""
-  s1@Str{} : SpecialChar c : rest@(Str {}:_) ->
-    (renderInline s1 `T.snoc` c) <> prettyInlines rest
+  s@Str{} : Styled style inlns : rest ->
+    renderInline s <> renderStyledSafely style inlns <> prettyInlines rest
+  s@Str{} : SpecialChar c : rest@(Str {}:_) ->
+    (renderInline s `T.snoc` c) <> prettyInlines rest
   (x:xs) ->
     renderInline x <> prettyInlines xs
-
 
 -- | Internal state used by the printer.
 newtype PrinterState = PrinterState
@@ -177,6 +178,11 @@ renderInline = \case
   Space                  -> " "
   SpecialChar c          -> "\\" `T.snoc` c
   Str txt                -> txt
+
+renderStyledSafely :: InlineStyle -> [Inline] -> Text
+renderStyledSafely style =
+  let delim = T.pack ['{', delimiterChar style, '}']
+  in (delim <>) . (<> delim) . prettyInlines
 
 delimiterChar :: InlineStyle -> Char
 delimiterChar = \case
