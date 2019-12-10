@@ -48,7 +48,7 @@ tests = testGroup "Blocks"
 
       , testCase "deleted text after linebreak" $
         parseJira para "foo\n-deleted-\n" @?=
-        Right (Para [Str "foo", Linebreak, Deleted [Str "deleted"]])
+        Right (Para [Str "foo", Linebreak, Styled Strikeout [Str "deleted"]])
       ]
 
     , testGroup "header"

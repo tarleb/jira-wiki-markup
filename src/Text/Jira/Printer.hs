@@ -167,11 +167,9 @@ listItemToJira items = do
 renderInline :: Inline -> Text
 renderInline = \case
   Anchor name            -> "{anchor:" <> name <> "}"
-  Deleted inlines        -> renderWrapped '-' inlines
-  Emph inlines           -> renderWrapped '_' inlines
+  Styled style inlines   -> renderWrapped (delimiterChar style) inlines
   Emoji icon             -> iconText icon
   Entity entity          -> "&" <> entity <> ";"
-  Inserted inlines       -> renderWrapped '+' inlines
   Image (URL url)        -> "!" <> url <> "!"
   Linebreak              -> "\n"
   Link inlines (URL url) -> "[" <> prettyInlines inlines <> "|" <> url <> "]"
@@ -179,9 +177,15 @@ renderInline = \case
   Space                  -> " "
   SpecialChar c          -> "\\" `T.snoc` c
   Str txt                -> txt
-  Strong inlines         -> renderWrapped '*' inlines
-  Subscript inlines      -> renderWrapped '~' inlines
-  Superscript inlines    -> renderWrapped '^' inlines
+
+delimiterChar :: InlineStyle -> Char
+delimiterChar = \case
+  Emphasis -> '_'
+  Insert -> '+'
+  Strong -> '*'
+  Strikeout -> '-'
+  Subscript -> '~'
+  Superscript -> '^'
 
 renderWrapped :: Char -> [Inline] -> Text
 renderWrapped c = T.cons c . flip T.snoc c . prettyInlines

@@ -118,42 +118,53 @@ tests = testGroup "Inline"
         "entities must not be empty"
       ]
 
-    , testCase "deleted" $
-      parseJira deleted "-far-fetched-" @?=
-      Right (Deleted [Str "far", SpecialChar '-', Str "fetched"])
+    , testGroup "styled"
 
-    , testGroup "emph"
-      [ testCase "single word" $
-        parseJira emph "_single_" @?= Right (Emph [Str "single"])
+      [ testCase "deleted" $
+        parseJira styled "-far-fetched-" @?=
+        Right (Styled Strikeout [Str "far", SpecialChar '-', Str "fetched"])
 
-      , testCase "multi word" $
-        parseJira emph "_multiple words_" @?=
-        Right (Emph [Str "multiple", Space, Str "words"])
+      , testGroup "emphasis"
+        [ testCase "single word" $
+          parseJira styled "_single_" @?= Right (Styled Emphasis [Str "single"])
 
-      , testCase "symbol before opening underscore" $
-        parseJira (str *> emph) "#_bar_" @?=
-        Right (Emph [Str "bar"])
+        , testCase "multi word" $
+          parseJira styled "_multiple words_" @?=
+          Right (Styled Emphasis [Str "multiple", Space, Str "words"])
 
-      , testCase "neither symbol nor space before opening underscore" $
-        isLeft (parseJira (str *> emph) "foo_bar_") @? "space after opening char"
+        , testCase "symbol before opening underscore" $
+          parseJira (str *> styled) "#_bar_" @?=
+          Right (Styled Emphasis [Str "bar"])
 
-      , testCase "disallow space after opening underscore" $
-        isLeft (parseJira emph "_ nope_") @? "space after underscore"
+        , testCase "neither symbol nor space before opening underscore" $
+          isLeft (parseJira (str *> styled) "foo_bar_") @? "space after opening char"
 
-      , testCase "require word boundary after closing underscore" $
-        isLeft (parseJira emph "_nope_nope") @? "no boundary after closing"
+        , testCase "disallow space after opening underscore" $
+          isLeft (parseJira styled "_ nope_") @? "space after underscore"
 
-      , testCase "zero with space as word boundary" $
-        parseJira ((,) <$> emph <*> str) "_yup_\8203next" @?=
-        Right (Emph [Str "yup"], Str "\8203next")
+        , testCase "require word boundary after closing underscore" $
+          isLeft (parseJira styled "_nope_nope") @? "no boundary after closing"
 
-      , testCase "fails for strong" $
-        isLeft (parseJira emph "*strong*") @? "strong as emph"
-      ]
+        , testCase "zero with space as word boundary" $
+          parseJira ((,) <$> styled <*> str) "_yup_\8203next" @?=
+          Right (Styled Emphasis [Str "yup"], Str "\8203next")
+        ]
 
-    , testCase "inserted" $
-      parseJira inserted "+multiple words+" @?=
-      Right (Inserted [Str "multiple", Space, Str "words"])
+      , testCase "inserted" $
+        parseJira styled "+multiple words+" @?=
+        Right (Styled Insert [Str "multiple", Space, Str "words"])
+
+      , testCase "strong" $
+        parseJira styled "*single*" @?= Right (Styled Strong [Str "single"])
+
+      , testCase "subscript" $
+        parseJira styled "~multiple words~" @?=
+        Right (Styled Subscript [Str "multiple", Space, Str "words"])
+
+      , testCase "superscript" $
+        parseJira styled "^multiple words^" @?=
+        Right (Styled Superscript [Str "multiple", Space, Str "words"])
+    ]
 
     , testCase "monospaced" $
       parseJira monospaced "{{multiple words}}" @?=
@@ -177,26 +188,6 @@ tests = testGroup "Inline"
         isLeft (parseJira linebreak "\nh1.foo\n") @? "newline before header"
       ]
 
-    , testGroup "strong"
-      [ testCase "single word" $
-        parseJira strong "*single*" @?= Right (Strong [Str "single"])
-
-      , testCase "multi word" $
-        parseJira strong "*multiple words*" @?=
-        Right (Strong [Str "multiple", Space, Str "words"])
-
-      , testCase "fails for emph" $
-        isLeft (parseJira strong "_emph_") @? "emph as strong"
-      ]
-
-    , testCase "subscript" $
-      parseJira subscript "~multiple words~" @?=
-      Right (Subscript [Str "multiple", Space, Str "words"])
-
-    , testCase "superscript" $
-      parseJira superscript "^multiple words^" @?=
-      Right (Superscript [Str "multiple", Space, Str "words"])
-
     , testCase "anchor" $
       parseJira anchor "{anchor:testing}" @?=
       Right (Anchor "testing")
@@ -212,7 +203,7 @@ tests = testGroup "Inline"
 
       , testCase "alias with emphasis" $
         parseJira link "[_important_ example|https://example.org]" @?=
-        Right (Link [Emph [Str "important"], Space, Str "example"]
+        Right (Link [Styled Emphasis [Str "important"], Space, Str "example"]
                 (URL "https://example.org"))
       ]
 

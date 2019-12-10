@@ -16,19 +16,14 @@ module Text.Jira.Parser.Inline
   ( inline
     -- * Inline component parsers
   , anchor
-  , deleted
   , emoji
-  , emph
   , entity
-  , inserted
   , image
   , linebreak
   , link
   , monospaced
   , str
-  , strong
-  , subscript
-  , superscript
+  , styled
   , symbol
   , whitespace
   ) where
@@ -54,12 +49,7 @@ inline = notFollowedBy' blockEnd *> choice
   , linebreak
   , link
   , image
-  , emph
-  , strong
-  , subscript
-  , superscript
-  , deleted
-  , inserted
+  , styled
   , monospaced
   , anchor
   , entity
@@ -185,35 +175,31 @@ link = try $ do
 --
 -- Markup
 --
--- | Parses deleted text into @Deleted@.
-deleted :: JiraParser Inline
-deleted = Deleted <$> ('-' `delimitingMany` inline) <?> "deleted"
 
--- | Parses emphasized text into @Emph@.
-emph :: JiraParser Inline
-emph = Emph <$> ('_' `delimitingMany` inline) <?> "emphasis"
+-- | Parses styled text
+styled :: JiraParser Inline
+styled = try $ do
+  delim <- lookAhead $ oneOf "-_+*~^"
+  content <- delim `delimitingMany` inline
+  let style = delimiterStyle delim
+  return $ Styled style content
 
--- | Parses inserted text into @Inserted@.
-inserted :: JiraParser Inline
-inserted = Inserted <$> ('+' `delimitingMany` inline) <?> "inserted"
+-- | Returns the markup kind from the delimiting markup character.
+delimiterStyle :: Char -> InlineStyle
+delimiterStyle = \case
+  '*' -> Strong
+  '+' -> Insert
+  '-' -> Strikeout
+  '^' -> Superscript
+  '_' -> Emphasis
+  '~' -> Subscript
+  c   -> error ("Unknown delimiter character: " ++ [c])
 
 -- | Parses monospaced text into @Monospaced@.
 monospaced :: JiraParser Inline
 monospaced = Monospaced
   <$> enclosed (try $ string "{{") (try $ string "}}") inline
   <?> "monospaced"
-
--- | Parses strongly emphasized text into @Strong@.
-strong :: JiraParser Inline
-strong = Strong <$> ('*' `delimitingMany` inline) <?> "strong"
-
--- | Parses subscript text into @Subscript@.
-subscript :: JiraParser Inline
-subscript = Subscript <$> ('~' `delimitingMany` inline) <?> "subscript"
-
--- | Parses superscript text into @Superscript@.
-superscript :: JiraParser Inline
-superscript = Superscript <$> ('^' `delimitingMany` inline) <?> "superscript"
 
 --
 -- Helpers

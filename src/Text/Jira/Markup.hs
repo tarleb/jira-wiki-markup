@@ -14,6 +14,7 @@ module Text.Jira.Markup
   ( Doc (..)
   , Block (..)
   , Inline (..)
+  , InlineStyle (..)
   , ListStyle (..)
   , URL (..)
   , Icon (..)
@@ -33,21 +34,26 @@ newtype Doc = Doc { fromDoc :: [Block] }
 -- | Inline Jira markup elements.
 data Inline
   = Anchor Text                         -- ^ anchor for internal links
-  | Deleted [Inline]                    -- ^ deleted (struk-out) text
   | Emoji Icon                          -- ^ emoticon
-  | Emph [Inline]                       -- ^ emphasized text
   | Entity Text                         -- ^ named or numeric HTML entity
   | Image URL                           -- ^ an image
-  | Inserted [Inline]                   -- ^ text marked as having been inserted
   | Linebreak                           -- ^ hard linebreak
   | Link [Inline] URL                   -- ^ hyperlink with alias
   | Monospaced [Inline]                 -- ^ text rendered with monospaced font
+  | Space                               -- ^ space between words
   | SpecialChar Char                    -- ^ single char with special meaning
   | Str Text                            -- ^ simple, markup-less string
-  | Space                               -- ^ space between words
-  | Strong [Inline]                     -- ^ strongly emphasized text
-  | Subscript [Inline]                  -- ^ subscript text
-  | Superscript [Inline]                -- ^ superscript text
+  | Styled InlineStyle [Inline]         -- ^ styled text
+  deriving (Eq, Ord, Show)
+
+-- | Supported inline text effect styles.
+data InlineStyle
+  = Emphasis                            -- ^ emphasized text
+  | Insert                              -- ^ text marked as having been inserted
+  | Strikeout                           -- ^ deleted (struk-out) text
+  | Strong                              -- ^ strongly emphasized text
+  | Subscript                           -- ^ subscript text
+  | Superscript                         -- ^ superscript text
   deriving (Eq, Ord, Show)
 
 -- | Blocks of text.
