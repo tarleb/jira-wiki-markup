@@ -40,9 +40,16 @@ pretty (Doc blks) = prettyBlocks blks
 prettyBlocks :: [Block] -> Text
 prettyBlocks blks = evalState (renderBlocks blks) startState
 
--- | Render a list of Jira inlines as Jira wiki formatted text.
+-- | Renders a list of Jira inline markup elements.
 prettyInlines :: [Inline] -> Text
-prettyInlines = renderInlines
+prettyInlines = \case
+  [] ->
+    ""
+  s1@Str{} : SpecialChar c : rest@(Str {}:_) ->
+    (renderInline s1 `T.snoc` c) <> prettyInlines rest
+  (x:xs) ->
+    renderInline x <> prettyInlines xs
+
 
 -- | Internal state used by the printer.
 newtype PrinterState = PrinterState
@@ -92,7 +99,7 @@ renderBlock = \case
                               , "{quote}"]
   Header lvl inlines       -> return $ mconcat
                               [ "h",  T.pack (show lvl), ". "
-                              , renderInlines inlines
+                              , prettyInlines inlines
                               ]
   HorizontalRule           -> return "----"
   List style items         -> listWithMarker items (styleChar style)
@@ -111,7 +118,7 @@ renderBlock = \case
                              , blks
                              , "{panel}"
                              ]
-  Para inlines              -> return $ renderInlines inlines
+  Para inlines              -> return $ prettyInlines inlines
   Table rows                -> fmap T.unlines (mapM renderRow rows)
 
 renderLang :: Language -> Text
@@ -156,10 +163,6 @@ listItemToJira items = do
   marker <- gets stateListLevel
   return $ marker <> " " <> contents
 
--- | Renders a list of inline elements as Jira markup.
-renderInlines :: [Inline] -> Text
-renderInlines = foldMap renderInline
-
 -- | Renders a single inline item as Jira markup.
 renderInline :: Inline -> Text
 renderInline = \case
@@ -171,8 +174,8 @@ renderInline = \case
   Inserted inlines       -> renderWrapped '+' inlines
   Image (URL url)        -> "!" <> url <> "!"
   Linebreak              -> "\n"
-  Link inlines (URL url) -> "[" <> renderInlines inlines <> "|" <> url <> "]"
-  Monospaced inlines     -> "{{" <> renderInlines inlines <> "}}"
+  Link inlines (URL url) -> "[" <> prettyInlines inlines <> "|" <> url <> "]"
+  Monospaced inlines     -> "{{" <> prettyInlines inlines <> "}}"
   Space                  -> " "
   SpecialChar c          -> "\\" `T.snoc` c
   Str txt                -> txt
@@ -181,4 +184,31 @@ renderInline = \case
   Superscript inlines    -> renderWrapped '^' inlines
 
 renderWrapped :: Char -> [Inline] -> Text
-renderWrapped c = T.cons c . flip T.snoc c . renderInlines
+renderWrapped c = T.cons c . flip T.snoc c . prettyInlines
+
+-- | Gets the characters used to represent an emoji.
+iconText :: Icon -> Text
+iconText = \case
+  IconSlightlySmiling -> ":)"
+  IconFrowning        -> ":("
+  IconTongue          -> ":P"
+  IconSmiling         -> ":D"
+  IconWinking         -> ";)"
+  IconThumbsUp        -> "(y)"
+  IconThumbsDown      -> "(n)"
+  IconInfo            -> "(i)"
+  IconCheckmark       -> "(/)"
+  IconX               -> "(x)"
+  IconAttention       -> "(!)"
+  IconPlus            -> "(+)"
+  IconMinus           -> "(-)"
+  IconQuestionmark    -> "(?)"
+  IconOn              -> "(on)"
+  IconOff             -> "(off)"
+  IconStar            -> "(*)"
+  IconStarRed         -> "(*r)"
+  IconStarGreen       -> "(*g)"
+  IconStarBlue        -> "(*b)"
+  IconStarYellow      -> "(*y)"
+  IconFlag            -> "(flag)"
+  IconFlagOff         -> "(flagoff)"

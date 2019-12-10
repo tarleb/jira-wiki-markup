@@ -44,12 +44,23 @@ tests = testGroup "Printer"
 
     ]
 
-  , testGroup "inlines"
+  , testGroup "isolated inline rendering"
     [ testCase "SpecialChar" $
       renderInline (SpecialChar '*') @?= "\\*"
 
     , testCase "Emoji" $
       renderInline (Emoji IconSmiling) @?= ":D"
+
+    ]
+
+  , testGroup "combined inlines"
+    [ testCase "special char between words" $
+      prettyInlines [Str "easy", SpecialChar '-', Str "peasy"] @?=
+      "easy-peasy"
+
+    , testCase "special char before word" $
+      prettyInlines [SpecialChar '*', Str "star"] @?=
+      "\\*star"
     ]
   ]
 
