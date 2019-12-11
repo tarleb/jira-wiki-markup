@@ -299,7 +299,7 @@ tests = testGroup "Blocks"
 
     , testGroup "color"
       [ testCase "single paragraph" $
-        parseJira color "{color:red}\nThis is red.\n{color}\n" @?=
+        parseJira color "{color:red}This is red.\n{color}\n" @?=
         Right (Color (ColorName "red")
                [Para [Str "This", Space, Str "is", Space, Str "red."]])
       ]

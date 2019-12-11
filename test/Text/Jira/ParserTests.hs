@@ -32,4 +32,26 @@ tests = testGroup "Parser"
       Right (Doc [ Header 1 [Str "test"]
                  , Para [Str "This", Space, Str "is", Space, Str "ok."]])
     ]
+
+  , testGroup "plainText"
+    [ testCase "word" $
+      plainText "kthxbye" @?=
+      Right [Str "kthxbye"]
+
+    , testCase "words" $
+      plainText "be Berlin" @?=
+      Right [Str "be", Space, Str "Berlin"]
+
+    , testCase "smiley" $
+      plainText ":)" @?=
+      Right [Str "\\:)"]
+
+    , testCase "icon after word" $
+      plainText "f(x)" @?=
+      Right [Str "f\\(x)"]
+
+    , testCase "special chars" $
+      plainText "*not strong*" @?=
+      Right [SpecialChar '*', Str "not", Space, Str "strong", SpecialChar '*']
+    ]
   ]

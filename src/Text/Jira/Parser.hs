@@ -13,7 +13,7 @@ Parse Jira wiki markup.
 module Text.Jira.Parser
   ( parse
   , doc
-  , textInlines
+  , plainText
   , module Text.Jira.Markup
   , module Text.Jira.Parser.Core
   , module Text.Jira.Parser.Inline
@@ -40,8 +40,8 @@ doc = Doc <$> many block <?> "doc"
 --
 -- This parser can be used to convert un-escaped strings into proper Jira markup
 -- elements.
-textInlines :: Text -> Either ParseError [Inline]
-textInlines = parseJira (many plainInlineParser)
+plainText :: Text -> Either ParseError [Inline]
+plainText = parseJira (normalizeInlines <$> many plainInlineParser)
   where
     plainInlineParser :: JiraParser Inline
     plainInlineParser = choice
