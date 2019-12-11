@@ -195,30 +195,3 @@ delimiterChar = \case
 
 renderWrapped :: Char -> [Inline] -> Text
 renderWrapped c = T.cons c . flip T.snoc c . prettyInlines
-
--- | Gets the characters used to represent an emoji.
-iconText :: Icon -> Text
-iconText = \case
-  IconSlightlySmiling -> ":)"
-  IconFrowning        -> ":("
-  IconTongue          -> ":P"
-  IconSmiling         -> ":D"
-  IconWinking         -> ";)"
-  IconThumbsUp        -> "(y)"
-  IconThumbsDown      -> "(n)"
-  IconInfo            -> "(i)"
-  IconCheckmark       -> "(/)"
-  IconX               -> "(x)"
-  IconAttention       -> "(!)"
-  IconPlus            -> "(+)"
-  IconMinus           -> "(-)"
-  IconQuestionmark    -> "(?)"
-  IconOn              -> "(on)"
-  IconOff             -> "(off)"
-  IconStar            -> "(*)"
-  IconStarRed         -> "(*r)"
-  IconStarGreen       -> "(*g)"
-  IconStarBlue        -> "(*b)"
-  IconStarYellow      -> "(*y)"
-  IconFlag            -> "(flag)"
-  IconFlagOff         -> "(flagoff)"

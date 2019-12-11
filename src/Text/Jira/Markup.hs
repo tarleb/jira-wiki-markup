@@ -23,6 +23,7 @@ module Text.Jira.Markup
   , Language (..)
   , Parameter (..)
   , normalizeInlines
+  , iconText
   ) where
 
 import Data.Text (Text, append)
@@ -138,3 +139,30 @@ normalizeInlines = \case
   Linebreak : Space : xs -> Linebreak : normalizeInlines xs
   Str s1 : Str s2 : xs   -> Str (s1 `append` s2) : normalizeInlines xs
   x : xs                 -> x : normalizeInlines xs
+
+-- | Gets the characters used to represent an emoji.
+iconText :: Icon -> Text
+iconText = \case
+  IconSlightlySmiling -> ":)"
+  IconFrowning        -> ":("
+  IconTongue          -> ":P"
+  IconSmiling         -> ":D"
+  IconWinking         -> ";)"
+  IconThumbsUp        -> "(y)"
+  IconThumbsDown      -> "(n)"
+  IconInfo            -> "(i)"
+  IconCheckmark       -> "(/)"
+  IconX               -> "(x)"
+  IconAttention       -> "(!)"
+  IconPlus            -> "(+)"
+  IconMinus           -> "(-)"
+  IconQuestionmark    -> "(?)"
+  IconOn              -> "(on)"
+  IconOff             -> "(off)"
+  IconStar            -> "(*)"
+  IconStarRed         -> "(*r)"
+  IconStarGreen       -> "(*g)"
+  IconStarBlue        -> "(*b)"
+  IconStarYellow      -> "(*y)"
+  IconFlag            -> "(flag)"
+  IconFlagOff         -> "(flagoff)"
