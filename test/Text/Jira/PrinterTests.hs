@@ -42,6 +42,9 @@ tests = testGroup "Printer"
     , testCase "horizontal rule" $
       renderBlock' HorizontalRule @?= "----"
 
+    , testCase "color" $
+      renderBlock' (Color (ColorName "blue") [Para [Str "yabadee"]]) @?=
+      "{color:blue}\nyabadee\n{color}"
     ]
 
   , testGroup "isolated inline"

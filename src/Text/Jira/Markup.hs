@@ -17,6 +17,7 @@ module Text.Jira.Markup
   , InlineStyle (..)
   , ListStyle (..)
   , URL (..)
+  , ColorName (..)
   , Icon (..)
   , Row (..)
   , Cell (..)
@@ -60,6 +61,7 @@ data InlineStyle
 -- | Blocks of text.
 data Block
   = Code Language [Parameter] Text      -- ^ Code block with panel parameters
+  | Color ColorName [Block]             -- ^ text displayed in a specific color
   | BlockQuote [Block]                  -- ^ Block of quoted content
   | Header Int [Inline]                 -- ^ Header with level and text
   | HorizontalRule                      -- ^ horizontal ruler
@@ -75,6 +77,10 @@ data ListStyle
   = CircleBullets                       -- ^ List with round bullets
   | SquareBullets                       -- ^ List with square bullets
   | Enumeration                         -- ^ Enumeration, i.e., numbered items
+  deriving (Eq, Ord, Show)
+
+-- | Text color
+newtype ColorName = ColorName Text
   deriving (Eq, Ord, Show)
 
 -- | Unified resource location

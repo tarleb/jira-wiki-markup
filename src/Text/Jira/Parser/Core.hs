@@ -101,11 +101,11 @@ endOfPara = eof
     headerStart    = void $ char 'h' *> oneOf "123456" <* char '.'
     listItemStart  = void $ many1 (oneOf "#*-") <* char ' '
     tableStart     = void $ skipSpaces *> many1 (char '|') *> char ' '
-    panelStart     = void $ char '{' *> choice (map string blockNames)
+    panelStart     = void $ char '{' *> choice (map (try . string) blockNames)
     horizontalRule = void $ try (string "----") *> blankline
 
 blockNames :: [String]
-blockNames = ["code", "noformat", "panel", "quote"]
+blockNames = ["code", "color", "noformat", "panel", "quote"]
 
 -- | Variant of parsec's @notFollowedBy@ function which properly fails even if
 -- the given parser does not consume any input (like @eof@ does).

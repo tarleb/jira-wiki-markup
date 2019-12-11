@@ -94,6 +94,11 @@ renderBlock = \case
                               , content
                               , "{code}\n"
                               ]
+  Color colorName blocks   -> renderBlocks blocks >>= \blks -> return $ mconcat
+                              [ "{color:", colorText colorName, "}\n"
+                              , blks
+                              , "{color}"
+                              ]
   BlockQuote blocks        -> renderBlocks blocks >>= \blks -> return $ mconcat
                               [ "{quote}\n"
                               , blks
@@ -121,6 +126,10 @@ renderBlock = \case
                              ]
   Para inlines              -> return $ prettyInlines inlines
   Table rows                -> fmap T.unlines (mapM renderRow rows)
+
+-- | Returns the ext representation of a color
+colorText :: ColorName -> Text
+colorText (ColorName c) = c
 
 renderLang :: Language -> Text
 renderLang (Language lang) = lang
@@ -168,7 +177,6 @@ listItemToJira items = do
 renderInline :: Inline -> Text
 renderInline = \case
   Anchor name            -> "{anchor:" <> name <> "}"
-  Styled style inlines   -> renderWrapped (delimiterChar style) inlines
   Emoji icon             -> iconText icon
   Entity entity          -> "&" <> entity <> ";"
   Image (URL url)        -> "!" <> url <> "!"
@@ -178,6 +186,7 @@ renderInline = \case
   Space                  -> " "
   SpecialChar c          -> "\\" `T.snoc` c
   Str txt                -> txt
+  Styled style inlines   -> renderWrapped (delimiterChar style) inlines
 
 renderStyledSafely :: InlineStyle -> [Inline] -> Text
 renderStyledSafely style =

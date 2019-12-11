@@ -14,6 +14,7 @@ module Text.Jira.Parser.Block
     -- * Parsers for block types
   , blockQuote
   , code
+  , color
   , header
   , horizontalRule
   , list
@@ -42,6 +43,7 @@ block = choice
   , code
   , noformat
   , panel
+  , color
   , para
   ] <* skipWhitespace
 
@@ -182,6 +184,13 @@ panel = try $ do
   (_, params) <- string "{panel" *> parameters <* char '}' <* newline
   content <- block `manyTill` try (string "{panel}" *> blankline)
   return $ Panel params content
+
+-- | Parses colored text into a @'Color'@ element.
+color :: JiraParser Block
+color= try $ do
+  name <- string "{color:" *> many letter <* char '}' <* optional newline
+  content <- block `manyTill` try (string "{color}" *> blankline)
+  return $ Color (ColorName $ pack name) content
 
 -- | Parses a set of panel parameters
 parameters :: JiraParser (Language, [Parameter])

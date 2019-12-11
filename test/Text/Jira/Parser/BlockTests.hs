@@ -297,6 +297,13 @@ tests = testGroup "Blocks"
         Right (Panel [Parameter "title" "test"] [Para [Str "line"]])
       ]
 
+    , testGroup "color"
+      [ testCase "single paragraph" $
+        parseJira color "{color:red}\nThis is red.\n{color}\n" @?=
+        Right (Color (ColorName "red")
+               [Para [Str "This", Space, Str "is", Space, Str "red."]])
+      ]
+
     , testGroup "blockQuote"
       [ testCase "single line quite before eof" $
         parseJira blockQuote "bq. this text" @?=
