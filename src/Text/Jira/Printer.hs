@@ -177,9 +177,10 @@ listItemToJira items = do
 renderInline :: Inline -> Text
 renderInline = \case
   Anchor name            -> "{anchor:" <> name <> "}"
+  AutoLink url           -> urlText url
   Emoji icon             -> iconText icon
   Entity entity          -> "&" <> entity <> ";"
-  Image (URL url)        -> "!" <> url <> "!"
+  Image url              -> "!" <> urlText url <> "!"
   Linebreak              -> "\n"
   Link inlines (URL url) -> "[" <> prettyInlines inlines <> "|" <> url <> "]"
   Monospaced inlines     -> "{{" <> prettyInlines inlines <> "}}"
@@ -201,6 +202,10 @@ delimiterChar = \case
   Strikeout -> '-'
   Subscript -> '~'
   Superscript -> '^'
+
+-- | Text rendering of an URL.
+urlText :: URL -> Text
+urlText (URL url) = url
 
 renderWrapped :: Char -> [Inline] -> Text
 renderWrapped c = T.cons c . flip T.snoc c . prettyInlines

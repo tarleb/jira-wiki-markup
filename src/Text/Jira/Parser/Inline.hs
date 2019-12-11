@@ -16,6 +16,7 @@ module Text.Jira.Parser.Inline
   ( inline
     -- * Inline component parsers
   , anchor
+  , autolink
   , emoji
   , entity
   , image
@@ -29,13 +30,13 @@ module Text.Jira.Parser.Inline
   ) where
 
 import Control.Monad (guard, void)
-import Data.Char (isLetter, isPunctuation)
+import Data.Char (isLetter, isPunctuation, ord)
 #if !MIN_VERSION_base(4,13,0)
 import Data.Monoid ((<>), All (..))
 #else
 import Data.Monoid (All (..))
 #endif
-import Data.Text (pack)
+import Data.Text (append, pack)
 import Text.Jira.Markup
 import Text.Jira.Parser.Core
 import Text.Parsec
@@ -45,6 +46,7 @@ inline :: JiraParser Inline
 inline = notFollowedBy' blockEnd *> choice
   [ whitespace
   , emoji
+  , autolink
   , str
   , linebreak
   , link
@@ -171,10 +173,30 @@ link = try $ do
   guard . not . stateInLink =<< getState
   withStateFlag (\b st -> st { stateInLink = b }) $ do
     _ <- char '['
-    alias <- option [] $ try (many inline <* char '|')
-    url   <- URL . pack <$> many1 (noneOf "|] \n")
+    alias   <- option [] $ try (many inline <* char '|')
+    linkUrl <- url
     _ <- char ']'
-    return $ Link alias url
+    return $ Link alias linkUrl
+
+autolink :: JiraParser Inline
+autolink = AutoLink <$> url
+
+url :: JiraParser URL
+url = try $ do
+  urlScheme <- scheme
+  sep <- pack <$> string "://"
+  rest <- pack <$> many (satisfy isUrlChar)
+  return $ URL (urlScheme `append` sep `append` rest)
+  where
+    isUrlChar c = c `notElem` ("|]" :: String) && ord c >= 32 && ord c <= 127
+    scheme = do
+      first <- letter
+      case first of
+        'f' -> ("file" <$ string "ile") <|> ("ftp" <$ string "tp")
+        'h' -> string "ttp" *> option "http" ("https" <$ char 's')
+        'i' -> "irc" <$ string "rc"
+        'n' -> ("nntp" <$ string "ntp") <|> ("news" <$ string "ews")
+        _   -> fail "not looking at a known scheme"
 
 --
 -- Markup

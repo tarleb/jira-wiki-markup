@@ -199,6 +199,10 @@ tests = testGroup "Inline"
       parseJira anchor "{anchor:testing}" @?=
       Right (Anchor "testing")
 
+    , testCase "autolink" $
+      parseJira autolink "https://example.org/foo" @?=
+      Right (AutoLink (URL "https://example.org/foo"))
+
     , testGroup "link"
       [ testCase "unaliased link" $
         parseJira link "[https://example.org]" @?=
@@ -235,6 +239,10 @@ tests = testGroup "Inline"
       Right [ Str "shopping", Space, Str "at", Space
             , Str "P", Entity "amp", Str "C"
             ]
+
+    , testCase "autolink followed by pipe" $
+      parseJira (many1 inline) "https://jira.example/file.txt|" @?=
+      Right [AutoLink (URL "https://jira.example/file.txt"), SpecialChar '|']
 
     , testCase "backslash-escaped char" $
       parseJira (normalizeInlines <$> many1 inline) "opening brace: \\{" @?=

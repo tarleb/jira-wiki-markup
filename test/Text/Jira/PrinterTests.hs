@@ -51,6 +51,10 @@ tests = testGroup "Printer"
     [ testCase "SpecialChar" $
       renderInline (SpecialChar '*') @?= "\\*"
 
+    , testCase "AutoLink" $
+      renderInline (AutoLink (URL "https://example.org")) @?=
+      "https://example.org"
+
     , testCase "Emoji" $
       renderInline (Emoji IconSmiling) @?= ":D"
 
