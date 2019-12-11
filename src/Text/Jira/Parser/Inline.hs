@@ -66,10 +66,14 @@ specialChars = " \n" ++ symbolChars
 symbolChars :: String
 symbolChars = "_+-*^~|[]{}(!&\\"
 
--- | Parses an in-paragraph newline as a @Linebreak@ element.
+-- | Parses an in-paragraph newline as a @Linebreak@ element. Both newline
+-- characters and double-backslash are recognized as line-breaks.
 linebreak :: JiraParser Inline
-linebreak = Linebreak <$ try (newline <* notFollowedBy' endOfPara)
-  <?> "linebreak"
+linebreak = Linebreak <$ try (
+  choice [ void $ newline <* notFollowedBy' endOfPara
+         , void $ string "\\\\" <* notFollowedBy' (char '\\')
+         ]
+  ) <?> "linebreak"
 
 -- | Parses whitespace and return a @Space@ element.
 whitespace :: JiraParser Inline

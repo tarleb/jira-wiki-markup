@@ -175,6 +175,10 @@ tests = testGroup "Inline"
         parseJira linebreak "\na" @?=
         Right Linebreak
 
+      , testCase "double-backslash linebreak" $
+        parseJira linebreak "\\\\" @?=
+        Right Linebreak
+
       , testCase "linebreak at eof fails" $
         isLeft (parseJira linebreak "\n") @? "newline before eof"
 
@@ -186,6 +190,9 @@ tests = testGroup "Inline"
 
       , testCase "linebreak before header fails" $
         isLeft (parseJira linebreak "\nh1.foo\n") @? "newline before header"
+
+      , testCase "three backslashes do not cause a linebreak" $
+        isLeft (parseJira linebreak "\\\\\\") @? "three backslashes"
       ]
 
     , testCase "anchor" $
