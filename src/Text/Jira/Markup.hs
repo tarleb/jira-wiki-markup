@@ -39,7 +39,7 @@ data Inline
   | AutoLink URL                        -- ^ URL which is also a link
   | Emoji Icon                          -- ^ emoticon
   | Entity Text                         -- ^ named or numeric HTML entity
-  | Image URL                           -- ^ an image
+  | Image [Parameter] URL               -- ^ an image
   | Linebreak                           -- ^ hard linebreak
   | Link [Inline] URL                   -- ^ hyperlink with alias
   | Monospaced [Inline]                 -- ^ text rendered with monospaced font

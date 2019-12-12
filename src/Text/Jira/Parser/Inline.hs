@@ -164,8 +164,12 @@ anchor = Anchor . pack . filter (/= ' ')
 
 -- | Parse image into an @Image@ element.
 image :: JiraParser Inline
-image = fmap (Image . URL . pack) . try $
-  char '!' *> noneOf "\r\t\n" `manyTill` char '!'
+image = try $ do
+  -- does not use @url@, as is may contain relative locations.
+  src <- char '!' *> (URL . pack <$> many1 (noneOf "\r\t\n|]!"))
+  (_, params) <- option (Nothing, []) (char '|' *> parameters)
+  _ <- char '!'
+  return $ Image params src
 
 -- | Parse link into a @Link@ element.
 link :: JiraParser Inline

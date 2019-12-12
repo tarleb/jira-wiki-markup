@@ -26,10 +26,12 @@ module Text.Jira.Parser.Core
   , blankline
   , skipSpaces
   , blockNames
+  , parameters
   ) where
 
 import Control.Monad (join, void)
-import Data.Text (Text)
+import Data.Text (Text, pack)
+import Text.Jira.Markup
 import Text.Parsec
 
 -- | Jira Parsec parser
@@ -87,6 +89,19 @@ skipSpaces = skipMany (char ' ')
 -- | Parses an empty line, i.e., a line with no chars or whitespace only.
 blankline :: JiraParser ()
 blankline = try $ skipSpaces *> void newline
+
+-- | Parses a set of panel parameters
+parameters :: JiraParser (Maybe Text, [Parameter])
+parameters = option (Nothing, []) $ do
+  _      <- char ':'
+  lang   <- optionMaybe (try language)
+  params <- try (Parameter <$> key <*> (char '=' *> value)) `sepBy` pipe
+  return (lang, params)
+  where
+    pipe     = char '|'
+    key      = pack <$> many1 (noneOf "\"'\t\n\r |{}=")
+    value    = pack <$> many1 (noneOf "\"'\n\r|{}=")
+    language = key <* (pipe <|> lookAhead (char '}'))
 
 -- | Succeeds if the parser is looking at the end of a paragraph.
 endOfPara :: JiraParser ()

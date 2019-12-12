@@ -151,9 +151,12 @@ cellStart = try
 -- | Parses a code block into a @Code@ element.
 code :: JiraParser Block
 code = try $ do
-  (lang, params) <- string "{code" *> parameters <* char '}' <* blankline
+  (langName, params) <- string "{code" *> parameters <* char '}' <* blankline
+  let lang = maybe defaultLanguage Language langName
   content <- anyChar `manyTill` try (string "{code}" *> blankline)
   return $ Code lang params (pack content)
+  where
+    defaultLanguage = Language (pack "java")
 
 -- | Parses a block quote into a @'Quote'@ element.
 blockQuote :: JiraParser Block
@@ -188,23 +191,12 @@ panel = try $ do
 -- | Parses colored text into a @'Color'@ element.
 color :: JiraParser Block
 color= try $ do
-  name <- string "{color:" *> many letter <* char '}' <* optional newline
+  name <- string "{color:" *> (colorName <|> colorCode) <* char '}'
   content <- block `manyTill` try (string "{color}" *> blankline)
   return $ Color (ColorName $ pack name) content
-
--- | Parses a set of panel parameters
-parameters :: JiraParser (Language, [Parameter])
-parameters = option (defaultLanguage, []) $ do
-  _      <- char ':'
-  lang   <- option defaultLanguage (try language)
-  params <- try (Parameter <$> key <*> (char '=' *> value)) `sepBy` pipe
-  return (lang, params)
   where
-    defaultLanguage = Language (pack "java")
-    pipe     = char '|'
-    key      = pack <$> many1 (noneOf "\"'\t\n\r |{}=")
-    value    = pack <$> many1 (noneOf "\"'\n\r|{}=")
-    language = Language <$> key <* (pipe <|> lookAhead (char '}'))
+    colorName = many letter
+    colorCode = optional (char '#') *> count 6 digit
 
 -- | Skip whitespace till we reach the next block
 skipWhitespace :: JiraParser ()

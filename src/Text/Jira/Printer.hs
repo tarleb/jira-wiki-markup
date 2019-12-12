@@ -180,7 +180,10 @@ renderInline = \case
   AutoLink url           -> urlText url
   Emoji icon             -> iconText icon
   Entity entity          -> "&" <> entity <> ";"
-  Image url              -> "!" <> urlText url <> "!"
+  Image params url       -> "!" <> urlText url <>
+                            if null params
+                            then "!"
+                            else "|" <> renderParams params <> "!"
   Linebreak              -> "\n"
   Link inlines (URL url) -> "[" <> prettyInlines inlines <> "|" <> url <> "]"
   Monospaced inlines     -> "{{" <> prettyInlines inlines <> "}}"
