@@ -39,12 +39,12 @@ tests = testGroup "Inline"
         "str should only be parsed into Space"
       ]
 
-    , testGroup "symbol"
-      [ testCase "special symbol" $
-        parseJira symbol "!" @?= Right (SpecialChar '!')
+    , testGroup "specialChar"
+      [ testCase "plain special char" $
+        parseJira specialChar "!" @?= Right (SpecialChar '!')
 
       , testCase "escaped symbol" $
-        parseJira symbol "\\{" @?= Right (SpecialChar '{')
+        parseJira specialChar "\\{" @?= Right (SpecialChar '{')
       ]
 
     , testGroup "emoji"

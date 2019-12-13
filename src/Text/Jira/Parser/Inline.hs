@@ -23,9 +23,9 @@ module Text.Jira.Parser.Inline
   , linebreak
   , link
   , monospaced
+  , specialChar
   , str
   , styled
-  , symbol
   , whitespace
   ) where
 
@@ -55,18 +55,14 @@ inline = notFollowedBy' blockEnd *> choice
   , monospaced
   , anchor
   , entity
-  , symbol
+  , specialChar
   ] <?> "inline"
   where
     blockEnd = char '{' *> choice (map string blockNames) <* char '}'
 
--- | Characters with a special meaning, i.e., those used for markup.
+-- | Characters which, depending on context, can have a special meaning.
 specialChars :: String
-specialChars = " \n" ++ symbolChars
-
--- | Special characters which can be part of a string.
-symbolChars :: String
-symbolChars = "_+-*^~|[]{}(!&\\"
+specialChars = "_+-*^~|[]{}(!&\\"
 
 -- | Parses an in-paragraph newline as a @Linebreak@ element. Both newline
 -- characters and double-backslash are recognized as line-breaks.
@@ -85,8 +81,10 @@ whitespace = Space <$ skipMany1 (char ' ') <?> "whitespace"
 str :: JiraParser Inline
 str = Str . pack <$> (alphaNums <|> otherNonSpecialChars) <?> "string"
   where
+    nonStrChars = " \n" ++ specialChars
     alphaNums = many1 alphaNum <* updateLastStrPos
-    otherNonSpecialChars = many1 (noneOf specialChars)
+    otherNonSpecialChars = many1 (noneOf nonStrChars)
+
 
 -- | Parses an HTML entity into an @'Entity'@ element.
 entity :: JiraParser Inline
@@ -137,20 +135,20 @@ emoji = Emoji <$> (smiley <|> icon) <* notFollowedBy' letter <?> "emoji"
         _         -> fail ("not a known emoji" <> name)
 
 -- | Parses a special character symbol as a @Str@.
-symbol :: JiraParser Inline
-symbol = SpecialChar <$> (escapedChar <|> symbolChar)
-  <?> "symbol"
+specialChar :: JiraParser Inline
+specialChar = SpecialChar <$> (escapedChar <|> plainSpecialChar)
+  <?> "special char"
   where
     escapedChar = try (char '\\' *> satisfy isPunctuation)
 
-    symbolChar = do
+    plainSpecialChar = do
       inTablePred <- do
         b <- stateInTable <$> getState
         return $ if b then All . (/= '|') else mempty
       inLinkPred  <- do
         b <- stateInLink  <$> getState
         return $ if b then All . (`notElem` ("]|\n" :: String)) else mempty
-      oneOf $ filter (getAll . (inTablePred <> inLinkPred)) symbolChars
+      oneOf $ filter (getAll . (inTablePred <> inLinkPred)) specialChars
 
 
 --

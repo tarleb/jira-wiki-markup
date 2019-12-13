@@ -48,7 +48,7 @@ plainText = parseJira (normalizeInlines <$> many plainInlineParser)
       [ whitespace
       , escapedEmoji
       , str
-      , symbol
+      , specialChar
       ] <?> "text-only inline"
 
     escapedEmoji = do
