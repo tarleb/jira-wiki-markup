@@ -28,6 +28,8 @@ library
                      , Text.Jira.Parser.Block
                      , Text.Jira.Parser.Core
                      , Text.Jira.Parser.Inline
+                     , Text.Jira.Parser.PlainText
+                     , Text.Jira.Parser.Shared
                      , Text.Jira.Printer
 
   build-depends:       base    >= 4.9   && < 5
