@@ -3,6 +3,30 @@
 `jira-wiki-markup` uses [PVP Versioning][1].
 The changelog is available [on GitHub][2].
 
+1.0.0
+=====
+
+Release pending.
+
+* Add `Doc` datatype representing a full document; `parse` now returns
+  this type.
+* Improve parsing:
+  - double-backslash is recognized as linebreak;
+  - emoticons are parsed as `Emoji`;
+  - naked URLs are parsed as `AutoLink`;
+  - blocks of colored text are parsed as `Color`.
+* A parser `plainText` was added available to read markup-less text.
+* *Inline*-parser `symbol` was renamed to `specialChar`.
+* Add printer module to render the document AST as Jira markup.
+* Markup datatype changes:
+  - new *Block* elements `Color` and `HorizontalRule`.
+  - new *Inline* elements `Emoji`, and `Styled`.
+  - *Inline* constructors `Subscript`, `Superscript`, `Emph`, `Strong`,
+    `Inserted`, and `Deleted` have been remove. Use `Styled` instead.
+  - Constructor `Image` now takes a list of parameters as an additional
+    argument.
+* CI runs also test GHC 8.8.
+
 0.1.1
 =====
 
