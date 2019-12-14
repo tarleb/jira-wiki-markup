@@ -11,7 +11,7 @@ Tests for the jira wiki printer.
 -}
 module Text.Jira.PrinterTests (tests) where
 
-import Data.Text (Text)
+import Data.Text (Text, intercalate)
 import Test.Tasty (TestTree, testGroup)
 import Test.Tasty.HUnit (testCase, (@?=))
 import Text.Jira.Markup
@@ -45,6 +45,42 @@ tests = testGroup "Printer"
     , testCase "color" $
       renderBlock' (Color (ColorName "blue") [Para [Str "yabadee"]]) @?=
       "{color:blue}\nyabadee\n{color}"
+
+    , testGroup "list"
+      [ testCase "simple list" $
+        let list = List SquareBullets [ [Para [Str "first"]]
+                                      , [Para [Str "second"]]
+                                      , [Para [Str "third"]]
+                                      ]
+        in renderBlock' list @?= "- first\n- second\n- third"
+      , testCase "nested list" $
+        let list = List CircleBullets
+                   [ [Para [Str "first"]]
+                   , [ List Enumeration   [ [Para [Str "second-1"]]
+                                          , [Para [Str "second-2"]]]]
+                   , [ Para [Str "third"]
+                     , List CircleBullets [ [Para [Str "third-1"]]
+                                          , [Para [Str "third-2"]]]]
+                   ]
+        in renderBlock' list @?= intercalate "\n"
+           [ "* first"
+           , "*# second-1"
+           , "*# second-2"
+           , "* third"
+           , "** third-1"
+           , "** third-2"
+           ]
+      ]
+
+    , testCase "table" $
+      let headerRow = Row [ HeaderCell [Para [Str "one"]]
+                          , HeaderCell [Para [Str "two"]]
+                          ]
+          bodyRow = Row [ BodyCell [Para [Str "1"]]
+                        , BodyCell [Para [Str "2"]]
+                        ]
+          table = Table [headerRow, bodyRow]
+      in renderBlock' table @?= "|| one || two ||\n| 1 | 2 |\n"
     ]
 
   , testGroup "isolated inline"

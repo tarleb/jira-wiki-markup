@@ -27,7 +27,7 @@ module Text.Jira.Printer
 import Data.Monoid ((<>))
 #endif
 import Control.Monad ((<=<))
-import Control.Monad.State (State, evalState, gets, modify)
+import Control.Monad.Reader (Reader, runReader, asks, local)
 import Data.Text (Text)
 import Text.Jira.Markup
 import qualified Data.Text as T
@@ -38,7 +38,7 @@ pretty (Doc blks) = prettyBlocks blks
 
 -- | Render a list of Jira blocks as Jira wiki formatted text.
 prettyBlocks :: [Block] -> Text
-prettyBlocks blks = evalState (renderBlocks blks) startState
+prettyBlocks blks = runReader (renderBlocks blks) startState
 
 -- | Renders a list of Jira inline markup elements.
 prettyInlines :: [Inline] -> Text
@@ -47,26 +47,34 @@ prettyInlines = \case
     ""
   s@Str{} : Styled style inlns : rest ->
     renderInline s <> renderStyledSafely style inlns <> prettyInlines rest
+  Styled style inlns : s@Str{} : rest ->
+    renderStyledSafely style inlns <> renderInline s <> prettyInlines rest
   s@Str{} : SpecialChar c : rest@(Str {}:_) ->
+    (renderInline s `T.snoc` c) <> prettyInlines rest
+  s@Space : SpecialChar c : rest@(Space {}:_) ->
+    (renderInline s `T.snoc` c) <> prettyInlines rest
+  s@Linebreak : SpecialChar c : rest@(Space {}:_) ->
     (renderInline s `T.snoc` c) <> prettyInlines rest
   (x:xs) ->
     renderInline x <> prettyInlines xs
 
 -- | Internal state used by the printer.
-newtype PrinterState = PrinterState
-  { stateListLevel :: Text
+data PrinterState = PrinterState
+  { stateInTable   :: Bool
+  , stateListLevel :: Text
   }
 
-type JiraPrinter a = State PrinterState a
+type JiraPrinter a = Reader PrinterState a
 
 -- | Run with default state.
 withDefault :: JiraPrinter a -> a
-withDefault = flip evalState startState
+withDefault = flip runReader startState
 
 -- | Default start state of the printer.
 startState :: PrinterState
 startState = PrinterState
-  { stateListLevel = ""
+  { stateInTable = False
+  , stateListLevel = ""
   }
 
 -- | Render a block as Jira wiki format.
@@ -76,12 +84,13 @@ renderBlocks = concatBlocks <=< mapM renderBlock
 -- | Combine the texts produced from rendering a list of blocks.
 concatBlocks :: [Text] -> JiraPrinter Text
 concatBlocks blks = do
-  listLevel <- gets stateListLevel
+  listLevel <- asks stateListLevel
+  inTable   <- asks stateInTable
   return $
-    -- add final newline only if we are not within a list
-    if T.null listLevel
-    then T.unlines blks
-    else T.intercalate "\n" blks
+    -- add final newline only if we are neither within a table nor a list.
+    if inTable || not (T.null listLevel)
+    then T.intercalate "\n" blks
+    else T.unlines blks
 
 -- | Render a block as Jira wiki format.
 renderBlock :: Block -> JiraPrinter Text
@@ -92,17 +101,18 @@ renderBlock = \case
                                 (renderLang lang : map renderParam params)
                               , "}\n"
                               , content
-                              , "{code}\n"
+                              , "\n{code}"
                               ]
   Color colorName blocks   -> renderBlocks blocks >>= \blks -> return $ mconcat
                               [ "{color:", colorText colorName, "}\n"
                               , blks
                               , "{color}"
                               ]
+  BlockQuote [Para xs]     -> return $ "bq. " <> prettyInlines xs
   BlockQuote blocks        -> renderBlocks blocks >>= \blks -> return $ mconcat
                               [ "{quote}\n"
                               , blks
-                              , "{quote}"]
+                              , "\n{quote}"]
   Header lvl inlines       -> return $ mconcat
                               [ "h",  T.pack (show lvl), ". "
                               , prettyInlines inlines
@@ -125,7 +135,9 @@ renderBlock = \case
                              , "{panel}"
                              ]
   Para inlines              -> return $ prettyInlines inlines
-  Table rows                -> fmap T.unlines (mapM renderRow rows)
+  Table rows                ->
+    local (\st -> st { stateInTable = True }) $
+      fmap T.unlines (mapM renderRow rows)
 
 -- | Returns the ext representation of a color
 colorText :: ColorName -> Text
@@ -141,7 +153,13 @@ renderParam :: Parameter -> Text
 renderParam (Parameter key value) = key <> "=" <> value
 
 renderRow :: Row -> JiraPrinter Text
-renderRow (Row cells) = T.unwords <$> mapM renderCell cells
+renderRow (Row cells) = do
+  rendered <- mapM renderCell cells
+  let closing = if all isHeaderCell cells then " ||" else " |"
+  return $ T.unwords rendered <> closing
+  where
+    isHeaderCell HeaderCell {} = True
+    isHeaderCell BodyCell {}   = False
 
 renderCell :: Cell -> JiraPrinter Text
 renderCell cell = let (cellStart, blocks) = case cell of
@@ -159,19 +177,19 @@ styleChar = \case
 listWithMarker :: [[Block]]
                -> Char
                -> JiraPrinter Text
-listWithMarker items marker = do
-  modify $ \s -> s { stateListLevel = stateListLevel s `T.snoc` marker }
-  contents <- mapM listItemToJira items
-  modify $ \s -> s { stateListLevel = T.init (stateListLevel s) }
-  concatBlocks contents
+listWithMarker items marker =
+  local (\s -> s { stateListLevel = stateListLevel s `T.snoc` marker }) $
+    concatBlocks =<< mapM listItemToJira items
 
 -- | Convert bullet or ordered list item (list of blocks) to Jira.
 listItemToJira :: [Block]
                -> JiraPrinter Text
 listItemToJira items = do
   contents <- renderBlocks items
-  marker <- gets stateListLevel
-  return $ marker <> " " <> contents
+  marker <- asks stateListLevel
+  return $ case items of
+    List{} : _ -> contents
+    _          -> marker <> " " <> contents
 
 -- | Renders a single inline item as Jira markup.
 renderInline :: Inline -> Text
@@ -188,7 +206,7 @@ renderInline = \case
   Link inlines (URL url) -> "[" <> prettyInlines inlines <> "|" <> url <> "]"
   Monospaced inlines     -> "{{" <> prettyInlines inlines <> "}}"
   Space                  -> " "
-  SpecialChar c          -> "\\" `T.snoc` c
+  SpecialChar c          -> if c == '\\' then "\\" else "\\" `T.snoc` c
   Str txt                -> txt
   Styled style inlines   -> renderWrapped (delimiterChar style) inlines
 
