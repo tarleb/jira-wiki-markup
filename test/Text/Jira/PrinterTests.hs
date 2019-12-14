@@ -115,6 +115,10 @@ tests = testGroup "Printer"
     , testCase "markup within word" $
       prettyInlines [Str "H", Styled Subscript [Str "2"], Str "O"] @?=
       "H{~}2{~}O"
+
+    , testCase "markup followed by punctuation" $
+      prettyInlines [Styled Emphasis [Str "Word"], Str "."] @?=
+      "_Word_."
     ]
   ]
 

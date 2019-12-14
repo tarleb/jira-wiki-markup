@@ -23,6 +23,7 @@ module Text.Jira.Printer
   , withDefault
   ) where
 
+import Data.Char (isAlphaNum)
 #if !MIN_VERSION_base(4,11,0)
 import Data.Monoid ((<>))
 #endif
@@ -47,7 +48,7 @@ prettyInlines = \case
     ""
   s@Str{} : Styled style inlns : rest ->
     renderInline s <> renderStyledSafely style inlns <> prettyInlines rest
-  Styled style inlns : s@Str{} : rest ->
+  Styled style inlns : s@(Str t) : rest | startsWithAlphaNum t ->
     renderStyledSafely style inlns <> renderInline s <> prettyInlines rest
   s@Str{} : SpecialChar c : rest@(Str {}:_) ->
     (renderInline s `T.snoc` c) <> prettyInlines rest
@@ -57,6 +58,11 @@ prettyInlines = \case
     (renderInline s `T.snoc` c) <> prettyInlines rest
   (x:xs) ->
     renderInline x <> prettyInlines xs
+
+  where
+    startsWithAlphaNum t = case T.uncons t of
+      Just (c, _) -> isAlphaNum c
+      _           -> False
 
 -- | Internal state used by the printer.
 data PrinterState = PrinterState
@@ -206,7 +212,9 @@ renderInline = \case
   Link inlines (URL url) -> "[" <> prettyInlines inlines <> "|" <> url <> "]"
   Monospaced inlines     -> "{{" <> prettyInlines inlines <> "}}"
   Space                  -> " "
-  SpecialChar c          -> if c == '\\' then "\\" else "\\" `T.snoc` c
+  SpecialChar c          -> case c of
+                              '\\' -> "\\"   -- backslash is unescapable
+                              _    -> "\\" `T.snoc` c
   Str txt                -> txt
   Styled style inlines   -> renderWrapped (delimiterChar style) inlines
 
