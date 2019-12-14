@@ -59,4 +59,4 @@ otherIcon = try $ do
     "*y"      -> pure IconStarYellow
     "flag"    -> pure IconFlag
     "flagoff" -> pure IconFlagOff
-    _         -> fail ("not a known emoji" <> name)
+    _         -> fail ("not a known emoji" ++ name)
