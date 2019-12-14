@@ -183,9 +183,10 @@ styleChar = \case
 listWithMarker :: [[Block]]
                -> Char
                -> JiraPrinter Text
-listWithMarker items marker =
-  local (\s -> s { stateListLevel = stateListLevel s `T.snoc` marker }) $
-    concatBlocks =<< mapM listItemToJira items
+listWithMarker items marker = do
+  let addItem s = s { stateListLevel = stateListLevel s `T.snoc` marker }
+  renderedBlocks <- local addItem $ mapM listItemToJira items
+  concatBlocks renderedBlocks
 
 -- | Convert bullet or ordered list item (list of blocks) to Jira.
 listItemToJira :: [Block]

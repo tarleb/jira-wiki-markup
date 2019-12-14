@@ -11,7 +11,8 @@ Tests for the jira wiki printer.
 -}
 module Text.Jira.PrinterTests (tests) where
 
-import Data.Text (Text, intercalate)
+import Prelude hiding (unlines)
+import Data.Text (Text, unlines)
 import Test.Tasty (TestTree, testGroup)
 import Test.Tasty.HUnit (testCase, (@?=))
 import Text.Jira.Markup
@@ -52,7 +53,12 @@ tests = testGroup "Printer"
                                       , [Para [Str "second"]]
                                       , [Para [Str "third"]]
                                       ]
-        in renderBlock' list @?= "- first\n- second\n- third"
+        in renderBlock' list @?= unlines
+           [ "- first"
+           , "- second"
+           , "- third"
+           ]
+
       , testCase "nested list" $
         let list = List CircleBullets
                    [ [Para [Str "first"]]
@@ -62,7 +68,7 @@ tests = testGroup "Printer"
                      , List CircleBullets [ [Para [Str "third-1"]]
                                           , [Para [Str "third-2"]]]]
                    ]
-        in renderBlock' list @?= intercalate "\n"
+        in renderBlock' list @?= unlines
            [ "* first"
            , "*# second-1"
            , "*# second-2"
@@ -81,6 +87,16 @@ tests = testGroup "Printer"
                         ]
           table = Table [headerRow, bodyRow]
       in renderBlock' table @?= "|| one || two ||\n| 1 | 2 |\n"
+
+    , testCase "para after table" $
+      let table = Table [Row [BodyCell [Para [Str "boring"]]]]
+          para = Para [Str "after", Space, Str "table"]
+      in prettyBlocks [table, para] @?= "| boring |\n\nafter table\n"
+
+    , testCase "para after list" $
+      let list = List Enumeration [[Para [Str "boring"]]]
+          para = Para [Str "after", Space, Str "table"]
+      in prettyBlocks [list, para] @?= "# boring\n\nafter table\n"
     ]
 
   , testGroup "isolated inline"
