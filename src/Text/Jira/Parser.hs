@@ -1,4 +1,3 @@
-{-# LANGUAGE LambdaCase #-}
 {-|
 Module      : Text.Jira.Parser
 Copyright   : © 2019 Albert Krewinkel
