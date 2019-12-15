@@ -199,9 +199,15 @@ tests = testGroup "Inline"
       parseJira anchor "{anchor:testing}" @?=
       Right (Anchor "testing")
 
-    , testCase "autolink" $
-      parseJira autolink "https://example.org/foo" @?=
-      Right (AutoLink (URL "https://example.org/foo"))
+    , testGroup "autolink"
+      [ testCase "hypertext link" $
+        parseJira autolink "https://example.org/foo" @?=
+        Right (AutoLink (URL "https://example.org/foo"))
+
+      , testCase "email" $
+        parseJira autolink "mailto:nobody@test.invalid" @?=
+        Right (AutoLink (URL "mailto:nobody@test.invalid"))
+      ]
 
     , testGroup "link"
       [ testCase "unaliased link" $
@@ -216,6 +222,10 @@ tests = testGroup "Inline"
         parseJira link "[_important_ example|https://example.org]" @?=
         Right (Link [Styled Emphasis [Str "important"], Space, Str "example"]
                 (URL "https://example.org"))
+
+      , testCase "mail address" $
+        parseJira link "[send mail|mailto:me@nope.invalid]" @?=
+        Right (Link [Str "send", Space, Str "mail"] (URL "me@nope.invalid"))
       ]
 
     , testGroup "image"

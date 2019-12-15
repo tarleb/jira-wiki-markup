@@ -143,21 +143,22 @@ link = try $ do
   withStateFlag (\b st -> st { stateInLink = b }) $ do
     _ <- char '['
     alias   <- option [] $ try (many inline <* char '|')
-    linkUrl <- url
+    linkUrl <- email <|> url
     _ <- char ']'
     return $ Link alias linkUrl
 
 autolink :: JiraParser Inline
-autolink = AutoLink <$> url
+autolink = AutoLink <$> (email <|> url) <?> "email or other URL"
 
+-- | Parse a URL with scheme @file@, @ftp@, @http@, @https@, @irc@, @nntp@, or
+-- @news@.
 url :: JiraParser URL
 url = try $ do
   urlScheme <- scheme
   sep <- pack <$> string "://"
-  rest <- pack <$> many (satisfy isUrlChar)
+  rest <- pack <$> many urlChar
   return $ URL (urlScheme `append` sep `append` rest)
   where
-    isUrlChar c = c `notElem` ("|]" :: String) && ord c >= 32 && ord c <= 127
     scheme = do
       first <- letter
       case first of
@@ -166,6 +167,17 @@ url = try $ do
         'i' -> "irc" <$ string "rc"
         'n' -> ("nntp" <$ string "ntp") <|> ("news" <$ string "ews")
         _   -> fail "not looking at a known scheme"
+
+-- | Parses an E-mail URL.
+email :: JiraParser URL
+email = URL . pack <$> try
+  ((++) <$> string "mailto:" <*> many1 urlChar)
+
+-- | Parses a character which is allowed in URLs
+urlChar :: JiraParser Char
+urlChar = satisfy $ \c ->
+  c `notElem` ("|]" :: String) && ord c >= 32 && ord c <= 127
+
 
 --
 -- Markup
