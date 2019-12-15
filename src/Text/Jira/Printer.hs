@@ -89,19 +89,23 @@ renderBlocks = concatBlocks <=< mapM renderBlock
 
 -- | Combine the texts produced from rendering a list of blocks.
 concatBlocks :: [Text] -> JiraPrinter Text
-concatBlocks blks = do
+concatBlocks = return . T.intercalate "\n"
+
+-- | Add a newline character unless we are within a list or table.
+appendNewline :: Text -> JiraPrinter Text
+appendNewline text = do
   listLevel <- asks stateListLevel
   inTable   <- asks stateInTable
   return $
     -- add final newline only if we are neither within a table nor a list.
     if inTable || not (T.null listLevel)
-    then T.intercalate "\n" blks
-    else T.unlines blks
+    then text
+    else text <> "\n"
 
 -- | Render a block as Jira wiki format.
 renderBlock :: Block -> JiraPrinter Text
 renderBlock = \case
-  Code lang params content -> return $ mconcat
+  Code lang params content -> return $ T.concat
                               [ "{code:"
                               , T.intercalate "|"
                                 (renderLang lang : map renderParam params)
@@ -109,38 +113,39 @@ renderBlock = \case
                               , content
                               , "\n{code}"
                               ]
-  Color colorName blocks   -> renderBlocks blocks >>= \blks -> return $ mconcat
+  Color colorName blocks   -> renderBlocks blocks >>= \blks -> return $ T.concat
                               [ "{color:", colorText colorName, "}\n"
                               , blks
                               , "{color}"
                               ]
   BlockQuote [Para xs]     -> return $ "bq. " <> prettyInlines xs
-  BlockQuote blocks        -> renderBlocks blocks >>= \blks -> return $ mconcat
+  BlockQuote blocks        -> renderBlocks blocks >>= \blks -> return $ T.concat
                               [ "{quote}\n"
                               , blks
                               , "\n{quote}"]
-  Header lvl inlines       -> return $ mconcat
+  Header lvl inlines       -> return $ T.concat
                               [ "h",  T.pack (show lvl), ". "
                               , prettyInlines inlines
                               ]
   HorizontalRule           -> return "----"
-  List style items         -> listWithMarker items (styleChar style)
-  NoFormat params content  -> return $ mconcat
+  List style items         -> listWithMarker items (styleChar style) >>=
+                              appendNewline
+  NoFormat params content  -> return $ T.concat
                               [ "{noformat"
-                              , if null params then mempty else renderParams params
+                              , renderBlockParams params
                               , "}\n"
                               , content
                               , "{noformat}"
                               ]
   Panel params blocks     -> renderBlocks blocks >>= \blks ->
-                             return $ mconcat
+                             return $ T.concat
                              [ "{panel"
-                             , if null params then mempty else T.cons ':' $ renderParams params
+                             , renderBlockParams params
                              , "}\n"
                              , blks
                              , "{panel}"
                              ]
-  Para inlines              -> return $ prettyInlines inlines
+  Para inlines              -> appendNewline $ prettyInlines inlines
   Table rows                ->
     local (\st -> st { stateInTable = True }) $
       fmap T.unlines (mapM renderRow rows)
@@ -151,6 +156,11 @@ colorText (ColorName c) = c
 
 renderLang :: Language -> Text
 renderLang (Language lang) = lang
+
+renderBlockParams :: [Parameter] -> Text
+renderBlockParams = \case
+  [] -> mempty
+  xs -> T.cons ':' (renderParams xs)
 
 renderParams :: [Parameter] -> Text
 renderParams = T.intercalate "|" . map renderParam
@@ -186,7 +196,7 @@ listWithMarker :: [[Block]]
 listWithMarker items marker = do
   let addItem s = s { stateListLevel = stateListLevel s `T.snoc` marker }
   renderedBlocks <- local addItem $ mapM listItemToJira items
-  concatBlocks renderedBlocks
+  return $ T.intercalate "\n" renderedBlocks
 
 -- | Convert bullet or ordered list item (list of blocks) to Jira.
 listItemToJira :: [Block]

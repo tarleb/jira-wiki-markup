@@ -28,7 +28,16 @@ tests = testGroup "Printer"
   , testGroup "blocks"
     [ testCase "simple paragraph" $
       let para = Para [Str "Hello,", Space, Str "World!"]
-      in renderBlock' para @?= "Hello, World!"
+      in renderBlock' para @?= "Hello, World!\n"
+
+    , testCase "two paragraphs" $
+      let para1 = Para [Str "First", Space, Str "paragraph."]
+          para2 = Para [Str "Second", Space, Str "paragraph."]
+      in prettyBlocks [para1, para2] @?= unlines
+         [ "First paragraph."
+         , ""
+         , "Second paragraph."
+         ]
 
     , testGroup "header"
       [ testCase "simple" $
