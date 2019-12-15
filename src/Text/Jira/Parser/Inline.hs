@@ -17,6 +17,7 @@ module Text.Jira.Parser.Inline
     -- * Inline component parsers
   , anchor
   , autolink
+  , dash
   , emoji
   , entity
   , image
@@ -49,6 +50,7 @@ inline :: JiraParser Inline
 inline = notFollowedBy' blockEnd *> choice
   [ whitespace
   , emoji
+  , dash
   , autolink
   , str
   , linebreak
@@ -100,6 +102,15 @@ entity = Entity . pack
 -- | Parses textual representation of an icon into an @'Emoji'@ element.
 emoji :: JiraParser Inline
 emoji = Emoji <$> icon <* notFollowedBy' letter <?> "emoji"
+
+-- | Parses ASCII representation of en-dash or em-dash.
+dash :: JiraParser Inline
+dash = try $ do
+  guard =<< notAfterString
+  _ <- string "--"
+  choice [ Str "—" <$ char '-'   -- em dash
+         , pure (Str "–")          -- en dash
+         ] <* lookAhead (void (char ' ') <|> eof)
 
 -- | Parses a special character symbol as a @Str@.
 specialChar :: JiraParser Inline

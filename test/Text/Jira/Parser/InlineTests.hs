@@ -47,6 +47,14 @@ tests = testGroup "Inline"
         parseJira specialChar "\\{" @?= Right (SpecialChar '{')
       ]
 
+    , testGroup "dash"
+      [ testCase "en dash" $
+        parseJira dash "--" @?= Right (Str "–")
+
+      , testCase "em dash" $
+        parseJira dash "---" @?= Right (Str "—")
+      ]
+
     , testGroup "emoji"
       [ testCase "smiling face" $
         parseJira emoji ":D" @?= Right (Emoji IconSmiling)
@@ -225,7 +233,8 @@ tests = testGroup "Inline"
 
       , testCase "mail address" $
         parseJira link "[send mail|mailto:me@nope.invalid]" @?=
-        Right (Link [Str "send", Space, Str "mail"] (URL "me@nope.invalid"))
+        Right (Link [Str "send", Space, Str "mail"]
+               (URL "mailto:me@nope.invalid"))
       ]
 
     , testGroup "image"
@@ -273,5 +282,9 @@ tests = testGroup "Inline"
     , testCase "smiley between words" $
       parseJira (normalizeInlines <$> many1 inline) "verdict: :D funny" @?=
       Right [Str "verdict:", Space, Emoji IconSmiling, Space, Str "funny"]
+
+    , testCase "dash with spaces" $
+      parseJira (many1 inline) "one  -- two" @?=
+      Right [Str "one", Space, Str "–", Space, Str "two"]
     ]
   ]
