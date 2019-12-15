@@ -224,7 +224,8 @@ renderInline = \case
   Monospaced inlines     -> "{{" <> prettyInlines inlines <> "}}"
   Space                  -> " "
   SpecialChar c          -> case c of
-                              '\\' -> "\\"   -- backslash is unescapable
+                              -- backslash is unescapable, render as entity
+                              '\\' -> "&bsol;"
                               _    -> "\\" `T.snoc` c
   Str txt                -> txt
   Styled style inlines   -> renderWrapped (delimiterChar style) inlines
