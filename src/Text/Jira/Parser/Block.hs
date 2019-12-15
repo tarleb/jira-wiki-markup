@@ -93,14 +93,14 @@ list = (<?> "list") . try $ do
     firstItemAtDepth :: Int -> JiraParser [Block]
     firstItemAtDepth depth = try $ listContent (depth + 1) <|>
       do
-        blocks <- nonListContent
+        blocks <- nonListContent depth
         nestedLists <- try . many $ listAtDepth (depth + 1)
         return $ blocks ++ nestedLists
 
     listItemAtDepth :: Int -> JiraParser Char -> JiraParser [Block]
     listItemAtDepth depth bulletChar = atDepth depth *>
-        try (bulletChar *> nonListContent) <|>
-        try (anyBulletMarker *> listContent depth)
+      (try (bulletChar *> nonListContent depth) <|>
+       try (anyBulletMarker *> listContent depth))
 
     listContent :: Int -> JiraParser [Block]
     listContent depth = do
@@ -111,13 +111,14 @@ list = (<?> "list") . try $ do
     anyBulletMarker :: JiraParser Char
     anyBulletMarker = oneOf "*-#"
 
-    nonListContent :: JiraParser [Block]
-    nonListContent = try $
+    nonListContent :: Int -> JiraParser [Block]
+    nonListContent depth = try $
       let nonListBlock = notFollowedBy' (many1 (oneOf "#-*")) *> block
       in char ' ' *> do
-        first <- block
-        rest  <- many nonListBlock
-        return (first : rest)
+        first   <- block
+        nonList <- many nonListBlock
+        lists   <- many (listAtDepth (depth + 1))
+        return (first : nonList ++ lists)
 
 -- | Parses a table into a @Table@ element.
 table :: JiraParser Block

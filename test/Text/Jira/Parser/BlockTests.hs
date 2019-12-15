@@ -167,14 +167,18 @@ tests = testGroup "Blocks"
       , testCase "item after nested list" $
         let text = Text.unlines
                    [ "* first"
-                   , "** nested"
                    , "* second"
+                   , "** nested1"
+                   , "** nested2"
+                   , "* third"
                    ]
         in parseJira list text @?=
            Right (List CircleBullets
-                  [ [ Para [Str "first"]
-                    , List CircleBullets [[Para [Str "nested"]]]]
-                  , [ Para [Str "second"]]])
+                  [ [ Para [Str "first"] ]
+                  , [ Para [Str "second"]
+                    , List CircleBullets [ [Para [Str "nested1"]]
+                                         , [Para [Str "nested2"]]]]
+                  , [ Para [Str "third"]] ])
 
       , testCase "nested lists" $
         let text = Text.unlines
