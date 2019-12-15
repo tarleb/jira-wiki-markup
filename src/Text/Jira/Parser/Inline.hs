@@ -196,11 +196,20 @@ urlChar = satisfy $ \c ->
 
 -- | Parses styled text
 styled :: JiraParser Inline
-styled = try $ do
-  delim <- lookAhead $ oneOf "-_+*~^"
-  content <- delim `delimitingMany` inline
-  let style = delimiterStyle delim
-  return $ Styled style content
+styled = (simpleStyled <|> forceStyled) <?> "styled text"
+  where
+    simpleStyled = try $ do
+      styleChar <- lookAhead $ oneOf "-_+*~^"
+      content   <- styleChar `delimitingMany` inline
+      let style = delimiterStyle styleChar
+      return $ Styled style content
+
+    forceStyled = try $ do
+      styleChar <- char '{' *> oneOf "-_+*~^" <* char '}'
+      let closing = try $ string ['{', styleChar, '}']
+      let style   = delimiterStyle styleChar
+      content   <- manyTill inline closing
+      return $ Styled style content
 
 -- | Returns the markup kind from the delimiting markup character.
 delimiterStyle :: Char -> InlineStyle

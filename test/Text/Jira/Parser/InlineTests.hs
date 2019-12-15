@@ -140,6 +140,10 @@ tests = testGroup "Inline"
           parseJira styled "_multiple words_" @?=
           Right (Styled Emphasis [Str "multiple", Space, Str "words"])
 
+        , testCase "forced markup" $
+          parseJira styled "{_}forced{_}" @?=
+          Right (Styled Emphasis [Str "forced"])
+
         , testCase "symbol before opening underscore" $
           parseJira (str *> styled) "#_bar_" @?=
           Right (Styled Emphasis [Str "bar"])
@@ -286,5 +290,10 @@ tests = testGroup "Inline"
     , testCase "dash with spaces" $
       parseJira (many1 inline) "one  -- two" @?=
       Right [Str "one", Space, Str "–", Space, Str "two"]
+
+
+    , testCase "forced markup" $
+      parseJira (many1 inline) "H{~}2{~}O" @?=
+      Right [Str "H", Styled Subscript [Str "2"], Str "O"]
     ]
   ]
