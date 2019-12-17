@@ -6,15 +6,19 @@ The changelog is available [on GitHub][2].
 1.0.0
 =====
 
-Release pending.
+Released 2019-12-17.
 
 * Add `Doc` datatype representing a full document; `parse` now returns
   this type.
 * Improve parsing:
   - double-backslash is recognized as linebreak;
   - emoticons are parsed as `Emoji`;
+  - special sequences of dashes are translated into their unicode
+    representation;
   - naked URLs are parsed as `AutoLink`;
-  - blocks of colored text are parsed as `Color`.
+  - blocks of colored text are parsed as `Color`;
+  - interpretation of special characters as markup can be forced by
+    surrounding them with curly braces.
 * A parser `plainText` was added available to read markup-less text.
 * *Inline*-parser `symbol` was renamed to `specialChar`.
 * Add printer module to render the document AST as Jira markup.
