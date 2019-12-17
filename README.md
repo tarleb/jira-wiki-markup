@@ -7,9 +7,11 @@
 [![Build status](https://travis-ci.com/tarleb/jira-wiki-markup.svg?branch=master)](https://travis-ci.com/tarleb/jira-wiki-markup)
 [![Windows build status](https://ci.appveyor.com/api/projects/status/github/tarleb/jira-wiki-markup?branch=master&svg=true)](https://ci.appveyor.com/project/tarleb/jira-wiki-markup)
 
-This package provides a parser for [Jira wiki markup]. It converts the
-raw text into an abstract syntax tree. The tree is easy to handle and to
-different to different output formats.
+This package provides a parser and printer for [Jira wiki markup]. It
+converts the raw text into an abstract syntax tree. The tree is easy to
+handle and to translate into different output formats.
+
+[Jira wiki markup]: https://jira.atlassian.com/secure/WikiRendererHelpAction.jspa?section=all
 
 # License
 
