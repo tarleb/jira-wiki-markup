@@ -88,7 +88,7 @@ list = (<?> "list") . try $ do
       _   -> error ("the impossible happened: unknown style for bullet " ++ [c])
 
     atDepth :: Int -> JiraParser ()
-    atDepth depth = try . void $ count depth anyBulletMarker
+    atDepth depth = try $ skipSpaces <* count depth anyBulletMarker
 
     firstItemAtDepth :: Int -> JiraParser [Block]
     firstItemAtDepth depth = try $ listContent (depth + 1) <|>
@@ -113,7 +113,9 @@ list = (<?> "list") . try $ do
 
     nonListContent :: Int -> JiraParser [Block]
     nonListContent depth = try $
-      let nonListBlock = notFollowedBy' (many1 (oneOf "#-*")) *> block
+      let nonListBlock = do
+            notFollowedBy' (skipSpaces *> many1 (oneOf "#-*"))
+            block
       in char ' ' *> do
         first   <- block
         nonList <- many nonListBlock

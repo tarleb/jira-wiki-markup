@@ -114,7 +114,7 @@ endOfPara = eof
   <|> lookAhead panelStart
   where
     headerStart    = void $ char 'h' *> oneOf "123456" <* char '.'
-    listItemStart  = void $ many1 (oneOf "#*-") <* char ' '
+    listItemStart  = void $ skipSpaces *> many1 (oneOf "#*-") <* char ' '
     tableStart     = void $ skipSpaces *> many1 (char '|') *> char ' '
     panelStart     = void $ char '{' *> choice (map (try . string) blockNames)
     horizontalRule = void $ try (string "----") *> blankline

@@ -193,6 +193,21 @@ tests = testGroup "Blocks"
                     , List CircleBullets [[Para [Str "drei"]]]
                     ]
                   ])
+
+      , testCase "indentation is ignored" $
+        let text = Text.unlines
+                   [ "        * One"
+                   , "        * Two"
+                   , "        ** Two.One"
+                   , "    * Three"
+                   ]
+        in parseJira list text @?=
+           Right (List CircleBullets
+                 [ [ Para [Str "One"] ]
+                 , [ Para [Str "Two"]
+                   , List CircleBullets [[Para [Str "Two.One"]]]]
+                 , [ Para [Str "Three"] ]
+                 ])
       ]
 
     , testGroup "Table"
