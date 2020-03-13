@@ -17,6 +17,7 @@ module Text.Jira.Parser.Inline
     -- * Inline component parsers
   , anchor
   , autolink
+  , colorInline
   , dash
   , emoji
   , entity
@@ -57,6 +58,7 @@ inline = notFollowedBy' blockEnd *> choice
   , link
   , image
   , styled
+  , colorInline
   , monospaced
   , anchor
   , entity
@@ -189,6 +191,19 @@ urlChar :: JiraParser Char
 urlChar = satisfy $ \c ->
   c `notElem` ("|]" :: String) && ord c >= 32 && ord c <= 127
 
+--
+-- Color
+--
+
+-- | Text in a different color.
+colorInline :: JiraParser Inline
+colorInline = try $ do
+  name <- string "{color:" *> (colorName <|> colorCode) <* char '}'
+  content <- inline `manyTill` try (string "{color}")
+  return $ ColorInline (ColorName $ pack name) content
+  where
+    colorName = many1 letter
+    colorCode = (:) <$> (option '#' (char '#')) <*> count 6 digit
 
 --
 -- Markup

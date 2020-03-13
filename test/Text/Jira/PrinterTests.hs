@@ -126,6 +126,11 @@ tests = testGroup "Printer"
     , testCase "Styled Strong" $
       renderInline (Styled Strong [Str "Hello,", Space, Str "World!"]) @?=
       "*Hello, World!*"
+
+    , testCase "Colored inlines" $
+      renderInline (ColorInline (ColorName "red")
+                    [Str "This", Space, Str "is", Space, Str "red."]) @?=
+      "{color:red}This is red.{color}"
     ]
 
   , testGroup "combined inlines"

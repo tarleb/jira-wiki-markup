@@ -213,6 +213,8 @@ renderInline :: Inline -> Text
 renderInline = \case
   Anchor name            -> "{anchor:" <> name <> "}"
   AutoLink url           -> urlText url
+  ColorInline color ils  -> "{color:" <> colorText color <> "}" <>
+                            prettyInlines ils <> "{color}"
   Emoji icon             -> iconText icon
   Entity entity          -> "&" <> entity <> ";"
   Image params url       -> "!" <> urlText url <>

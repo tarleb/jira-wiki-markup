@@ -250,6 +250,20 @@ tests = testGroup "Inline"
         isLeft (parseJira image "!hello\nworld.png!") @?
         "no newlines in image names"
       ]
+
+    , testGroup "color"
+      [ testCase "colored word" $
+        parseJira colorInline "{color:red}red{color}" @?=
+        Right (ColorInline (ColorName "red") [Str "red"])
+
+      , testCase "hex color" $
+        parseJira colorInline "{color:#526487}blueish{color}" @?=
+        Right (ColorInline (ColorName "#526487") [Str "blueish"])
+
+      , testCase "hex color without hash" $
+        parseJira colorInline "{color:526487}blueish{color}" @?=
+        Right (ColorInline (ColorName "#526487") [Str "blueish"])
+      ]
     ]
 
   , testGroup "inline parser"
@@ -291,9 +305,15 @@ tests = testGroup "Inline"
       parseJira (many1 inline) "one  -- two" @?=
       Right [Str "one", Space, Str "–", Space, Str "two"]
 
-
     , testCase "forced markup" $
       parseJira (many1 inline) "H{~}2{~}O" @?=
       Right [Str "H", Styled Subscript [Str "2"], Str "O"]
+
+    , testCase "color in sentence" $
+      parseJira (many1 inline) "This is {color:red}red{color}." @?=
+      Right [ Str "This", Space, Str "is", Space
+            , ColorInline (ColorName "red") [Str "red"]
+            , Str "."
+            ]
     ]
   ]
