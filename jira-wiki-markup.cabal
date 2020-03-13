@@ -10,7 +10,7 @@ license:             MIT
 license-file:        LICENSE
 author:              Albert Krewinkel
 maintainer:          tarleb@zeitkraut.de
-copyright:           © 2019 Albert Krewinkel
+copyright:           © 2019–2020 Albert Krewinkel
 category:            Text
 build-type:          Simple
 extra-doc-files:     README.md

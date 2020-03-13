@@ -2,7 +2,7 @@
 {-# LANGUAGE LambdaCase #-}
 {-|
 Module      : Text.Jira.Parser.Inline
-Copyright   : © 2019 Albert Krewinkel
+Copyright   : © 2019–2020 Albert Krewinkel
 License     : MIT
 
 Maintainer  : Albert Krewinkel <tarleb@zeitkraut.de>
