@@ -3,6 +3,16 @@
 `jira-wiki-markup` uses [PVP Versioning][1].
 The changelog is available [on GitHub][2].
 
+1.1.0
+=====
+
+Released 2020-03-13.
+
+* Lists are now allowed to be indented; i.e., lists are still recognized
+  if list markers are preceded by spaces.
+* Support for colored inlines has been added.
+* New constructor `ColorInline` for type `Inline` (API change).
+
 1.0.0
 =====
 
