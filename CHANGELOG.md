@@ -3,6 +3,15 @@
 `jira-wiki-markup` uses [PVP Versioning][1].
 The changelog is available [on GitHub][2].
 
+1.1.2
+=====
+
+Released 2020-03-18
+
+* Don't escape colon/semicolon unless necessary: it is necessary
+  to escape colons or semicolons only if they could otherwise
+  become part of a smiley.
+
 1.1.1
 =====
 
