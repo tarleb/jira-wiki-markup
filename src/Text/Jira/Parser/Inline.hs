@@ -34,7 +34,7 @@ module Text.Jira.Parser.Inline
   ) where
 
 import Control.Monad (guard, void)
-import Data.Char (isLetter, isAlphaNum, isPunctuation, ord)
+import Data.Char (isAlphaNum, isPunctuation, ord)
 #if !MIN_VERSION_base(4,13,0)
 import Data.Monoid ((<>), All (..))
 #else
@@ -261,4 +261,4 @@ enclosed opening closing parser = try $ do
   opening *> notFollowedBy space *> manyTill parser closing'
   where
     closing' = try $ closing <* lookAhead wordBoundary
-    wordBoundary = void (satisfy (not . isLetter)) <|> eof
+    wordBoundary = void (satisfy (not . isAlphaNum)) <|> eof

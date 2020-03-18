@@ -320,5 +320,13 @@ tests = testGroup "Inline"
             , ColorInline (ColorName "red") [Str "red"]
             , Str "."
             ]
+
+    , testCase "hypen between numbers" $
+      -- the hypens used to be treated as deletion markers.
+      parseJira (many1 inline) "-15 02-3" @?=
+      Right [ SpecialChar '-', Str "15" , Space, Str "02"
+            , SpecialChar '-', Str "3"
+            ]
+
     ]
   ]
