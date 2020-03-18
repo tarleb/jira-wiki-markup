@@ -34,6 +34,9 @@ tests = testGroup "Inline"
       , testCase "umlauts" $
         parseJira str "äéíöüßðå" @?= Right (Str "äéíöüßðå")
 
+      , testCase "mix of alphanums and non-special chars" $
+        parseJira str "20.09" @?= Right (Str "20.09")
+
       , testCase "space fails" $
         isLeft (parseJira str " ") @?
         "str should only be parsed into Space"

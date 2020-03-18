@@ -34,7 +34,7 @@ module Text.Jira.Parser.Inline
   ) where
 
 import Control.Monad (guard, void)
-import Data.Char (isLetter, isPunctuation, ord)
+import Data.Char (isLetter, isAlphaNum, isPunctuation, ord)
 #if !MIN_VERSION_base(4,13,0)
 import Data.Monoid ((<>), All (..))
 #else
@@ -86,12 +86,14 @@ whitespace = Space <$ skipMany1 (char ' ') <?> "whitespace"
 
 -- | Parses a simple, markup-less string into a @Str@ element.
 str :: JiraParser Inline
-str = Str . pack <$> (alphaNums <|> otherNonSpecialChars) <?> "string"
+str = Str . pack . mconcat
+  <$> many1 (alphaNums <|> otherNonSpecialChars)
+  <?> "string"
   where
     nonStrChars = " \n" ++ specialChars
     alphaNums = many1 alphaNum <* updateLastStrPos
-    otherNonSpecialChars = many1 (noneOf nonStrChars)
-
+    otherNonSpecialChars = many1 . satisfy $ \c ->
+      not (isAlphaNum c || c `elem` nonStrChars)
 
 -- | Parses an HTML entity into an @'Entity'@ element.
 entity :: JiraParser Inline
