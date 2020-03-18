@@ -56,6 +56,12 @@ prettyInlines = \case
     (renderInline s `T.snoc` c) <> prettyInlines rest
   s@Linebreak : SpecialChar c : rest@(Space {}:_) ->
     (renderInline s `T.snoc` c) <> prettyInlines rest
+  -- Colon and semicolon only need escaping if they could otherwise
+  -- become part of a smiley.
+  SpecialChar c : rest@(x : _) | c `elem` [':', ';'] && not (isSmileyStr x) ->
+    T.singleton c <> prettyInlines rest
+  [SpecialChar c] | c `elem` [':', ';'] ->
+    T.singleton c
   (x:xs) ->
     renderInline x <> prettyInlines xs
 
@@ -63,6 +69,9 @@ prettyInlines = \case
     startsWithAlphaNum t = case T.uncons t of
       Just (c, _) -> isAlphaNum c
       _           -> False
+    isSmileyStr = \case
+      Str x | x `elem` ["D", ")", "(", "P"] -> True
+      _                                     -> False
 
 -- | Internal state used by the printer.
 data PrinterState = PrinterState

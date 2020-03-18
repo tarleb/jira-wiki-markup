@@ -149,6 +149,24 @@ tests = testGroup "Printer"
     , testCase "markup followed by punctuation" $
       prettyInlines [Styled Emphasis [Str "Word"], Str "."] @?=
       "_Word_."
+
+    , testCase "colon as last character" $
+      prettyInlines [Str "end", SpecialChar ':'] @?=
+      "end:"
+
+    , testCase "semicolon is escaped before close paren" $
+      -- would be treated as "winking smiley" otherwise
+      prettyInlines [SpecialChar ';', Str ")"] @?=
+      "\\;)"
+
+    , testCase "colon is not escaped before space" $
+      prettyInlines [SpecialChar ':', Space, Str "end"] @?=
+      ": end"
+
+    , testCase "colon not escaped before opening paren" $
+      -- escaping the paren is enough
+      prettyInlines [SpecialChar ':', SpecialChar '('] @?=
+      ":\\("
     ]
   ]
 
