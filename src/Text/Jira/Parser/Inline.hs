@@ -69,7 +69,7 @@ inline = notFollowedBy' blockEnd *> choice
 
 -- | Characters which, depending on context, can have a special meaning.
 specialChars :: String
-specialChars = "_+-*^~|[]{}(!&\\"
+specialChars = "_+-*^~|[]{}(!&\\:;"
 
 -- | Parses an in-paragraph newline as a @Linebreak@ element. Both newline
 -- characters and double-backslash are recognized as line-breaks.

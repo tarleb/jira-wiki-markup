@@ -29,7 +29,7 @@ tests = testGroup "Inline"
         parseJira str "word" @?= Right (Str "word")
 
       , testCase "non-special symbols" $
-        parseJira str ",.;#%" @?= Right (Str ",.;#%")
+        parseJira str ",.#%" @?= Right (Str ",.#%")
 
       , testCase "umlauts" $
         parseJira str "äéíöüßðå" @?= Right (Str "äéíöüßðå")
@@ -283,7 +283,8 @@ tests = testGroup "Inline"
 
     , testCase "backslash-escaped char" $
       parseJira (normalizeInlines <$> many1 inline) "opening brace: \\{" @?=
-      Right [Str "opening", Space, Str "brace:", Space, SpecialChar '{']
+      Right [ Str "opening", Space, Str "brace", SpecialChar ':', Space
+            , SpecialChar '{']
 
     , testCase "icon after word" $
       parseJira (many1 inline) "checkmark(/)" @?=
@@ -299,7 +300,8 @@ tests = testGroup "Inline"
 
     , testCase "smiley between words" $
       parseJira (normalizeInlines <$> many1 inline) "verdict: :D funny" @?=
-      Right [Str "verdict:", Space, Emoji IconSmiling, Space, Str "funny"]
+      Right [ Str "verdict", SpecialChar ':', Space
+            , Emoji IconSmiling, Space, Str "funny"]
 
     , testCase "dash with spaces" $
       parseJira (many1 inline) "one  -- two" @?=
