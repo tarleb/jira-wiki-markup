@@ -115,7 +115,7 @@ endOfPara = eof
   where
     headerStart    = void $ char 'h' *> oneOf "123456" <* char '.'
     listItemStart  = void $ skipSpaces *> many1 (oneOf "#*-") <* char ' '
-    tableStart     = void $ skipSpaces *> many1 (char '|') *> char ' '
+    tableStart     = void $ skipSpaces *> many1 (char '|')
     panelStart     = void $ char '{' *> choice (map (try . string) blockNames)
     horizontalRule = void $ try (string "----") *> blankline
 

@@ -373,6 +373,14 @@ tests = testGroup "Blocks"
       Right ( List CircleBullets [[Para [Str "foo"]]]
             , List CircleBullets [[Para [Str "bar"]]])
 
+    , testCase "para before table" $
+      parseJira ((,) <$> block <*> block) "tabletest\n||Name|\n|Test|\n" @?=
+      Right ( Para [Str "tabletest"]
+            , Table [ Row [HeaderCell [Para [Str "Name"]]]
+                    , Row [BodyCell [Para [Str "Test"]]]
+                    ]
+            )
+
     , testCase "para after table" $
       parseJira ((,) <$> block <*> block) "|| point |\nhuh\n" @?=
       Right ( Table [Row [HeaderCell [Para [Str "point"]]]]
