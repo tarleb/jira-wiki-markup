@@ -3,6 +3,16 @@
 `jira-wiki-markup` uses [PVP Versioning][1].
 The changelog is available [on GitHub][2].
 
+1.1.3
+=====
+
+Released 2020-03-19
+
+* Fixed table detection in endOfParagraph parser: Tables were
+  expected to have a space between the leading pipe(s) and the
+  cell content. Lines like `||Name|` were erroneously not
+  recognized as the beginning of a new block.
+
 1.1.2
 =====
 
