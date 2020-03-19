@@ -1,10 +1,11 @@
-# Changelog
+Changelog
+=========
 
 `jira-wiki-markup` uses [PVP Versioning][1].
 The changelog is available [on GitHub][2].
 
 1.1.3
-=====
+-----
 
 Released 2020-03-19
 
@@ -14,7 +15,7 @@ Released 2020-03-19
   recognized as the beginning of a new block.
 
 1.1.2
-=====
+-----
 
 Released 2020-03-18
 
@@ -23,7 +24,7 @@ Released 2020-03-18
   become part of a smiley.
 
 1.1.1
-=====
+-----
 
 Released 2020-03-18
 
@@ -37,7 +38,7 @@ Released 2020-03-18
   characters.
 
 1.1.0
-=====
+-----
 
 Released 2020-03-13.
 
@@ -47,7 +48,7 @@ Released 2020-03-13.
 * New constructor `ColorInline` for type `Inline` (API change).
 
 1.0.0
-=====
+-----
 
 Released 2019-12-17.
 
@@ -75,12 +76,12 @@ Released 2019-12-17.
 * CI runs also test GHC 8.8.
 
 0.1.1
-=====
+-----
 
 * Ensure proper parsing of backslash-escaped characters.
 
 0.1.0
-=====
+-----
 
 * Initially created.
 
