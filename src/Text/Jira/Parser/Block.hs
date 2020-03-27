@@ -138,7 +138,7 @@ row = fmap Row . try $
 cell :: JiraParser Cell
 cell = try $ do
   mkCell <- cellStart
-  bs     <- many1 block
+  bs     <- many block
   return $ mkCell bs
 
 -- | Parses the beginning of a table cell and returns a function which

@@ -263,6 +263,18 @@ tests = testGroup "Blocks"
         parseJira table "| * foo\n- bar\n" @?=
         Right (Table [Row [BodyCell [ List CircleBullets [[Para [Str "foo"]]]
                                     , List SquareBullets [[Para [Str "bar"]]]]]])
+
+      , testCase "empty cell in row" $
+        parseJira table (Text.unlines
+                         [ "|a|b|"
+                         , "| |b|"
+                         , "|a| |"
+                         ]) @?=
+        Right (Table
+               [ Row [BodyCell [Para [Str "a"]], BodyCell [Para [Str "b"]]]
+               , Row [BodyCell [],               BodyCell [Para [Str "b"]]]
+               , Row [BodyCell [Para [Str "a"]], BodyCell []]
+               ])
       ]
 
     , testGroup "code"
