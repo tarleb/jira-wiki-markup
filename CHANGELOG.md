@@ -4,6 +4,14 @@ Changelog
 `jira-wiki-markup` uses [PVP Versioning][1].
 The changelog is available [on GitHub][2].
 
+1.1.4
+-----
+
+Released 2020-03-27
+
+* Fix parsing of image parameters. Thumbnails and images with
+  parameters were previously not recognized as images.
+
 1.1.3
 -----
 
