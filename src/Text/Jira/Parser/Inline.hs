@@ -11,7 +11,6 @@ Portability : portable
 
 Parse Jira wiki inline markup.
 -}
-
 module Text.Jira.Parser.Inline
   ( inline
     -- * Inline component parsers
@@ -147,9 +146,15 @@ image :: JiraParser Inline
 image = try $ do
   -- does not use @url@, as is may contain relative locations.
   src <- char '!' *> (URL . pack <$> many1 (noneOf "\r\t\n|]!"))
-  (_, params) <- option (Nothing, []) (char '|' *> parameters)
+  params <- option [] (char '|' *> (thumbnail <|> imgParams `sepBy` comma))
   _ <- char '!'
   return $ Image params src
+  where
+    thumbnail = [Parameter "thumbnail" ""] <$ try (string "thumbnail")
+    imgParams = try (Parameter <$> key <*> (char '=' *> value))
+    key       = pack <$> many1 (noneOf ",\"'\t\n\r |{}=!")
+    value     = pack <$> many1 (noneOf ",\"'\n\r|{}=!")
+    comma     = char ',' *> skipSpaces
 
 -- | Parse link into a @Link@ element.
 link :: JiraParser Inline

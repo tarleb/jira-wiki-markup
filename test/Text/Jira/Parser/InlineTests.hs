@@ -252,6 +252,17 @@ tests = testGroup "Inline"
       , testCase "no newlines" $
         isLeft (parseJira image "!hello\nworld.png!") @?
         "no newlines in image names"
+
+      , testCase "thumbnail" $
+        parseJira image "!image.png|thumbnail!" @?=
+        Right (Image [Parameter "thumbnail" ""] (URL "image.png"))
+
+      , testCase "parameters" $
+        parseJira image "!image.gif|align=right, vspace=4!" @?=
+        let params = [ Parameter "align" "right"
+                     , Parameter "vspace" "4"
+                     ]
+        in Right (Image params (URL "image.gif"))
       ]
 
     , testGroup "color"
