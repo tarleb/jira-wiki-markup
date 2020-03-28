@@ -19,8 +19,10 @@ module Text.Jira.Parser.Core
   , withStateFlag
   -- * String position tracking
   , updateLastStrPos
+  , updateLastSpcPos
   , notAfterString
   , afterString
+  , afterSpace
   -- * Parsing helpers
   , endOfPara
   , notFollowedBy'
@@ -43,6 +45,7 @@ data ParserState = ParserState
   { stateInLink      :: Bool            -- ^ whether the parser is within a link
   , stateInList      :: Bool            -- ^ whether the parser is within a list
   , stateInTable     :: Bool            -- ^ whether the parser is within a table
+  , stateLastSpcPos  :: Maybe SourcePos -- ^ most recent space char position
   , stateLastStrPos  :: Maybe SourcePos -- ^ position at which the last string
                                         --   ended
   }
@@ -53,6 +56,7 @@ defaultState = ParserState
   { stateInLink      = False
   , stateInList      = False
   , stateInTable     = False
+  , stateLastSpcPos  = Nothing
   , stateLastStrPos  = Nothing
   }
 
@@ -72,6 +76,13 @@ updateLastStrPos = do
   pos <- getPosition
   modifyState $ \st -> st { stateLastStrPos = Just pos }
 
+-- | Updates the state, marking the current input position as the end of a
+-- string.
+updateLastSpcPos :: JiraParser ()
+updateLastSpcPos = do
+  pos <- getPosition
+  modifyState $ \st -> st { stateLastSpcPos = Just pos }
+
 -- | Returns @'True'@ if the current parser position is directly
 -- after a word/string. Returns @'False'@ if the parser is
 -- looking at the first character of the input.
@@ -85,10 +96,15 @@ afterString = do
 -- the beginning of the document or if the preceding characters
 -- did not belong to a string.
 notAfterString :: JiraParser Bool
-notAfterString = do
+notAfterString = not <$> afterString
+
+-- | Returns @'True'@ iff the character before the current parser
+-- position was a space.
+afterSpace :: JiraParser Bool
+afterSpace = do
   curPos <- getPosition
-  prevPos <- stateLastStrPos <$> getState
-  return (Just curPos /= prevPos)
+  lastSpacePos <- stateLastSpcPos <$> getState
+  return (Just curPos == lastSpacePos)
 
 -- | Parses a string with the given Jira parser.
 parseJira :: JiraParser a -> Text -> Either ParseError a

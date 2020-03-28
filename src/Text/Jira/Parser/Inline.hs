@@ -77,11 +77,13 @@ linebreak = Linebreak <$ try (
   choice [ void $ newline <* notFollowedBy' endOfPara
          , void $ string "\\\\" <* notFollowedBy' (char '\\')
          ]
+    <* updateLastSpcPos
   ) <?> "linebreak"
 
 -- | Parses whitespace and return a @Space@ element.
 whitespace :: JiraParser Inline
-whitespace = Space <$ skipMany1 (char ' ') <?> "whitespace"
+whitespace = Space <$ skipMany1 (char ' ') <* updateLastSpcPos
+  <?> "whitespace"
 
 -- | Parses a simple, markup-less string into a @Str@ element.
 str :: JiraParser Inline
@@ -266,6 +268,6 @@ enclosed opening closing parser = try $ do
   opening *> notFollowedBy space *> manyTill parser closing'
   where
     closing' = try $ do
-      guard =<< afterString
+      guard . not =<< afterSpace
       closing <* lookAhead wordBoundary
     wordBoundary = void (satisfy (not . isAlphaNum)) <|> eof

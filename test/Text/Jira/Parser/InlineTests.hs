@@ -135,6 +135,10 @@ tests = testGroup "Inline"
         parseJira styled "-far-fetched-" @?=
         Right (Styled Strikeout [Str "far", SpecialChar '-', Str "fetched"])
 
+      , testCase "symbol before closing char" $
+        parseJira styled "-backwards<-" @?=
+        Right (Styled Strikeout [Str "backwards<"])
+
       , testGroup "emphasis"
         [ testCase "single word" $
           parseJira styled "_single_" @?= Right (Styled Emphasis [Str "single"])
