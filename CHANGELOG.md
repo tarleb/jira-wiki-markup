@@ -4,12 +4,24 @@ Changelog
 `jira-wiki-markup` uses [PVP Versioning][1].
 The changelog is available [on GitHub][2].
 
+1.1.5
+-----
+
+Released 2020-03-28
+
+* Added check that closing markup chars are preceeded by words. Previously,
+  plain text was still incorrectly treated as markup. E.g., the dashes in `->
+  step ->` used to be interpreted as delimiters marking deleted text.
+
+* Allow empty table cells; table parsing failed if one of the cells did not
+  contain any content.
+
 1.1.4
 -----
 
 Released 2020-03-27
 
-* Fix parsing of image parameters. Thumbnails and images with
+* Fixed parsing of image parameters. Thumbnails and images with
   parameters were previously not recognized as images.
 
 1.1.3
