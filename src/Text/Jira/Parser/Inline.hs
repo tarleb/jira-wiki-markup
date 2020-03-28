@@ -265,5 +265,7 @@ enclosed opening closing parser = try $ do
   guard =<< notAfterString
   opening *> notFollowedBy space *> manyTill parser closing'
   where
-    closing' = try $ closing <* lookAhead wordBoundary
+    closing' = try $ do
+      guard =<< afterString
+      closing <* lookAhead wordBoundary
     wordBoundary = void (satisfy (not . isAlphaNum)) <|> eof

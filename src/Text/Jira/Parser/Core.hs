@@ -20,6 +20,7 @@ module Text.Jira.Parser.Core
   -- * String position tracking
   , updateLastStrPos
   , notAfterString
+  , afterString
   -- * Parsing helpers
   , endOfPara
   , notFollowedBy'
@@ -71,7 +72,18 @@ updateLastStrPos = do
   pos <- getPosition
   modifyState $ \st -> st { stateLastStrPos = Just pos }
 
--- | Checks whether the parser is directly after a string.
+-- | Returns @'True'@ if the current parser position is directly
+-- after a word/string. Returns @'False'@ if the parser is
+-- looking at the first character of the input.
+afterString :: JiraParser Bool
+afterString = do
+  curPos <- getPosition
+  prevPos <- stateLastStrPos <$> getState
+  return (Just curPos == prevPos)
+
+-- | Returns true when the current parser position is either at
+-- the beginning of the document or if the preceding characters
+-- did not belong to a string.
 notAfterString :: JiraParser Bool
 notAfterString = do
   curPos <- getPosition

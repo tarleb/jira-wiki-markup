@@ -339,5 +339,11 @@ tests = testGroup "Inline"
             , SpecialChar '-', Str "3"
             ]
 
+    , testCase "ascii arrows" $
+      -- the hypens used to be treated as deletion markers.
+      parseJira (many1 inline) "-> step ->" @?=
+      Right [ SpecialChar '-', Str ">" , Space, Str "step", Space
+            , SpecialChar '-', Str ">"
+            ]
     ]
   ]
