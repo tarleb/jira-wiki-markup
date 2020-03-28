@@ -4,17 +4,26 @@ Changelog
 `jira-wiki-markup` uses [PVP Versioning][1].
 The changelog is available [on GitHub][2].
 
-1.1.5
+1.2.0
 -----
 
 Released 2020-03-28
 
-* Added check that closing markup chars are preceeded by words. Previously,
-  plain text was still incorrectly treated as markup. E.g., the dashes in `->
-  step ->` used to be interpreted as delimiters marking deleted text.
+* Added check that a closing markup char is not preceeded by a
+  whitespace character. Previously, plain text was still
+  incorrectly treated as markup. E.g., the dashes in `-> step ->`
+  used to be interpreted as delimiters marking deleted text.
 
-* Allow empty table cells; table parsing failed if one of the cells did not
-  contain any content.
+* Allows empty table cells; table parsing failed if one of the
+  cells did not contain any content.
+
+* Changes to module `Text.Jira.Parser.Core`:
+
+    - A field `stateLastSpcPos` was added to data type
+      `ParserState` to keep track of spaces.
+    - Function `updateLastSpcPos` was added to update the
+      aforementioned field.
+    - Function `afterSpace` was added to test the field.
 
 1.1.4
 -----
