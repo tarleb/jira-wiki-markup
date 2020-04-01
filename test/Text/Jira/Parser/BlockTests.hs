@@ -368,13 +368,23 @@ tests = testGroup "Blocks"
       parseJira ((,) <$> block <*> block) "h2.header\nparagraph\n" @?=
       Right (Header 2 [Str "header"], Para [Str "paragraph"])
 
-    , testCase "para before horizontal rule " $
+    , testCase "para before horizontal rule" $
       parseJira ((,) <$> block <*> return HorizontalRule) "paragraph\n----\n" @?=
       Right (Para [Str "paragraph"], HorizontalRule)
 
-    , testCase "para after horizontal rule " $
+    , testCase "para after horizontal rule" $
       parseJira ((,) <$> block <*> block) "----\nparagraph\n" @?=
       Right (HorizontalRule, Para [Str "paragraph"])
+
+    , testCase "para before blockquote" $
+      parseJira ((,) <$> block <*> block) "before\nbq. a quote\n" @?=
+      Right ( Para [Str "before"]
+            , BlockQuote [Para [Str "a", Space, Str "quote"]])
+
+    , testCase "para after blockquote" $
+      parseJira ((,) <$> block <*> block) "bq. a quote\nafter\n" @?=
+      Right ( BlockQuote [Para [Str "a", Space, Str "quote"]]
+            , Para [Str "after"] )
 
     , testCase "para after list" $
       parseJira ((,) <$> block <*> block) "* foo\n\nbar\n" @?=
