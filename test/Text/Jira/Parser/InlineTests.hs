@@ -279,8 +279,8 @@ tests = testGroup "Inline"
         Right (ColorInline (ColorName "#526487") [Str "blueish"])
 
       , testCase "hex color without hash" $
-        parseJira colorInline "{color:526487}blueish{color}" @?=
-        Right (ColorInline (ColorName "#526487") [Str "blueish"])
+        parseJira colorInline "{color:526Ab7}blueish{color}" @?=
+        Right (ColorInline (ColorName "#526Ab7") [Str "blueish"])
       ]
     ]
 

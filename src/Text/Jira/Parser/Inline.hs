@@ -212,7 +212,7 @@ colorInline = try $ do
   return $ ColorInline (ColorName $ pack name) content
   where
     colorName = many1 letter
-    colorCode = (:) <$> option '#' (char '#') <*> count 6 digit
+    colorCode = (:) <$> option '#' (char '#') <*> count 6 hexDigit
 
 --
 -- Markup

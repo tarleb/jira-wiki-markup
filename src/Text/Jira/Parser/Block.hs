@@ -199,7 +199,7 @@ color= try $ do
   return $ Color (ColorName $ pack name) content
   where
     colorName = many letter
-    colorCode = optional (char '#') *> count 6 digit
+    colorCode = optional (char '#') *> count 6 hexDigit
 
 -- | Skip whitespace till we reach the next block
 skipWhitespace :: JiraParser ()
