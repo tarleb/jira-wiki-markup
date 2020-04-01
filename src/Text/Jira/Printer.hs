@@ -226,10 +226,7 @@ renderInline = \case
                             prettyInlines ils <> "{color}"
   Emoji icon             -> iconText icon
   Entity entity          -> "&" <> entity <> ";"
-  Image params url       -> "!" <> urlText url <>
-                            if null params
-                            then "!"
-                            else "|" <> renderParams params <> "!"
+  Image ps url           -> "!" <> urlText url <> renderImageParams ps <> "!"
   Linebreak              -> "\n"
   Link inlines (URL url) -> "[" <> prettyInlines inlines <> "|" <> url <> "]"
   Monospaced inlines     -> "{{" <> prettyInlines inlines <> "}}"
@@ -258,6 +255,13 @@ delimiterChar = \case
 -- | Text rendering of an URL.
 urlText :: URL -> Text
 urlText (URL url) = url
+
+-- | Render image parameters (i.e., separate by comma).
+renderImageParams :: [Parameter] -> Text
+renderImageParams = \case
+  [] -> ""
+  ps | "thumbnail" `elem` map parameterKey ps -> "|thumbnail"
+  ps -> "|" <> T.intercalate ", " (map renderParam ps)
 
 renderWrapped :: Char -> [Inline] -> Text
 renderWrapped c = T.cons c . flip T.snoc c . prettyInlines

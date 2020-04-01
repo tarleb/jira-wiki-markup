@@ -119,6 +119,15 @@ tests = testGroup "Printer"
     , testCase "Emoji" $
       renderInline (Emoji IconSmiling) @?= ":D"
 
+    , testCase "thumbnail" $
+      renderInline (Image [Parameter "thumbnail" ""] (URL "example.jpg")) @?=
+      "!example.jpg|thumbnail!"
+
+    , testCase "image attributes" $
+      let params = [Parameter "align" "right", Parameter "vspace" "4"]
+      in renderInline (Image params (URL "example.jpg")) @?=
+         "!example.jpg|align=right, vspace=4!"
+
     , testCase "Styled Emphasis" $
       renderInline (Styled Emphasis [Str "Hello,", Space, Str "World!"]) @?=
       "_Hello, World!_"
