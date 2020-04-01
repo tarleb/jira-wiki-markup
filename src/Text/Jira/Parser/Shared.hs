@@ -12,6 +12,7 @@ Parsers whch are shared between multiple modules.
 -}
 module Text.Jira.Parser.Shared
   ( icon
+  , colorName
   ) where
 
 import Data.Char (isLetter)
@@ -60,3 +61,8 @@ otherIcon = try $ do
     "flag"    -> pure IconFlag
     "flagoff" -> pure IconFlagOff
     _         -> fail ("not a known emoji" ++ name)
+
+colorName :: Parsec Text u String
+colorName = many1 letter <|> hexColor
+  where
+    hexColor = (:) <$> option '#' (char '#') <*> count 6 hexDigit

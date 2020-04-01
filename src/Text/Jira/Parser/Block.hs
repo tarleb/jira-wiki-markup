@@ -30,6 +30,7 @@ import Data.Text (pack)
 import Text.Jira.Markup
 import Text.Jira.Parser.Core
 import Text.Jira.Parser.Inline
+import Text.Jira.Parser.Shared (colorName)
 import Text.Parsec
 
 -- | Parses any block element.
@@ -194,12 +195,9 @@ panel = try $ do
 -- | Parses colored text into a @'Color'@ element.
 color :: JiraParser Block
 color= try $ do
-  name <- string "{color:" *> (colorName <|> colorCode) <* char '}'
+  name <- string "{color:" *> colorName <* char '}'
   content <- block `manyTill` try (string "{color}" *> blankline)
   return $ Color (ColorName $ pack name) content
-  where
-    colorName = many letter
-    colorCode = optional (char '#') *> count 6 hexDigit
 
 -- | Skip whitespace till we reach the next block
 skipWhitespace :: JiraParser ()

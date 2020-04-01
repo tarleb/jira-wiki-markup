@@ -207,12 +207,9 @@ urlChar = satisfy $ \c ->
 -- | Text in a different color.
 colorInline :: JiraParser Inline
 colorInline = try $ do
-  name <- string "{color:" *> (colorName <|> colorCode) <* char '}'
+  name <- string "{color:" *> colorName <* char '}'
   content <- inline `manyTill` try (string "{color}")
   return $ ColorInline (ColorName $ pack name) content
-  where
-    colorName = many1 letter
-    colorCode = (:) <$> option '#' (char '#') <*> count 6 hexDigit
 
 --
 -- Markup

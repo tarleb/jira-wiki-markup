@@ -333,6 +333,12 @@ tests = testGroup "Blocks"
         parseJira color "{color:red}This is red.\n{color}\n" @?=
         Right (Color (ColorName "red")
                [Para [Str "This", Space, Str "is", Space, Str "red."]])
+
+      , testCase "paragraph preceeded by newline" $
+        parseJira color "{color:#cccccc}\nThis is gray.\n{color}\n" @?=
+        Right (Color (ColorName "#cccccc")
+               [Para [ Linebreak, Str "This", Space
+                     , Str "is", Space, Str "gray."]])
       ]
 
     , testGroup "blockQuote"
