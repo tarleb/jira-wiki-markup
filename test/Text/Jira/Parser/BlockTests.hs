@@ -336,13 +336,17 @@ tests = testGroup "Blocks"
       ]
 
     , testGroup "blockQuote"
-      [ testCase "single line quite before eof" $
+      [ testCase "single line right before eof" $
         parseJira blockQuote "bq. this text" @?=
         Right (BlockQuote [Para [Str "this", Space, Str "text"]])
 
       , testCase "single line blockquote" $
         parseJira blockQuote "bq. this test\n" @?=
         Right (BlockQuote [Para [Str "this", Space, Str "test"]])
+
+      , testCase "single line w\\o leading space" $
+        parseJira blockQuote "bq.another test\n" @?=
+        Right (BlockQuote [Para [Str "another", Space, Str "test"]])
 
       , testCase "multi-paragraph block quote" $
         parseJira blockQuote "{quote}\npara1\n\npara2\n{quote}\n" @?=

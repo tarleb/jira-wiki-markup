@@ -166,7 +166,7 @@ blockQuote :: JiraParser Block
 blockQuote = try $ singleLineBq <|> multiLineBq
   where
     singleLineBq = BlockQuote . (:[]) . Para <$>
-                   (string "bq. " *> skipMany (char ' ') *>
+                   (string "bq." *> skipMany (char ' ') *>
                     inline `manyTill` (void newline <|> eof))
     multiLineBq = BlockQuote <$>
                   (string "{quote}" *> optional blankline *>
