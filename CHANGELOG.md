@@ -4,6 +4,29 @@ Changelog
 `jira-wiki-markup` uses [PVP Versioning][1].
 The changelog is available [on GitHub][2].
 
+1.2.1
+-----
+
+Released 2020-04-02
+
+* Fixed rendering of image attributes: image attributes are
+  separated by commas instead of pipes; the latter are used in
+  block parameters.
+
+* Fixed parsing of blockquotes which are not preceeded by blank
+  lines.
+
+* Ensure parsing of single-line blockquotes is possible even if
+  there is no space between `bq.` marker and contents.
+
+* Fixed parsing of colors: parsing no longer fails for hexcolors
+  which contain non-decimal digits.
+
+* Changes to module `Text.Jira.Parser.Shared`:
+
+    - New parsing function `colorName` which parses a color
+      descriptor, i.e. either a name or a hexcolor.
+
 1.2.0
 -----
 
