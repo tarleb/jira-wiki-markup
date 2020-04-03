@@ -37,6 +37,7 @@ newtype Doc = Doc { fromDoc :: [Block] }
 data Inline
   = Anchor Text                         -- ^ anchor for internal links
   | AutoLink URL                        -- ^ URL which is also a link
+  | Citation [Inline]                   -- ^ source of a citation
   | ColorInline ColorName [Inline]      -- ^ colored inline text
   | Emoji Icon                          -- ^ emoticon
   | Entity Text                         -- ^ named or numeric HTML entity

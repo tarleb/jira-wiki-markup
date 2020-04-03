@@ -228,6 +228,17 @@ tests = testGroup "Inline"
         Right (AutoLink (URL "mailto:nobody@test.invalid"))
       ]
 
+    , testGroup "citation"
+      [ testCase "name" $
+        parseJira citation "??John Doe??" @?=
+        Right (Citation [Str "John", Space, Str "Doe"])
+
+      , testCase "with markup" $
+        parseJira citation "??Jane *Example* Doe??" @?=
+        Right (Citation [ Str "Jane", Space, Styled Strong [Str "Example"]
+                        , Space, Str "Doe"])
+      ]
+
     , testGroup "link"
       [ testCase "unaliased link" $
         parseJira link "[https://example.org]" @?=

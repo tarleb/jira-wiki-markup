@@ -116,6 +116,10 @@ tests = testGroup "Printer"
       renderInline (AutoLink (URL "https://example.org")) @?=
       "https://example.org"
 
+    , testCase "citation" $
+      renderInline (Citation [Str "John", Space, Str "Doe"]) @?=
+      "??John Doe??"
+
     , testCase "Emoji" $
       renderInline (Emoji IconSmiling) @?= ":D"
 
@@ -176,6 +180,16 @@ tests = testGroup "Printer"
       -- escaping the paren is enough
       prettyInlines [SpecialChar ':', SpecialChar '('] @?=
       ":\\("
+
+    , testGroup "question marks"
+      [ testCase "escaped if followed by question mark" $
+        prettyInlines [SpecialChar '?', SpecialChar '?'] @?=
+        "\\??"
+
+      , testCase "unescaped before space" $
+        prettyInlines [SpecialChar '?', Space, Str "foo"] @?=
+        "? foo"
+      ]
     ]
   ]
 

@@ -16,6 +16,7 @@ module Text.Jira.Parser.Inline
     -- * Inline component parsers
   , anchor
   , autolink
+  , citation
   , colorInline
   , dash
   , emoji
@@ -60,6 +61,7 @@ inline = notFollowedBy' blockEnd *> choice
   , colorInline
   , monospaced
   , anchor
+  , citation
   , entity
   , specialChar
   ] <?> "inline"
@@ -68,7 +70,7 @@ inline = notFollowedBy' blockEnd *> choice
 
 -- | Characters which, depending on context, can have a special meaning.
 specialChars :: String
-specialChars = "_+-*^~|[]{}(!&\\:;"
+specialChars = "_+-*^~|[]{}(?!&\\:;"
 
 -- | Parses an in-paragraph newline as a @Linebreak@ element. Both newline
 -- characters and double-backslash are recognized as line-breaks.
@@ -248,6 +250,11 @@ monospaced :: JiraParser Inline
 monospaced = Monospaced
   <$> enclosed (try $ string "{{") (try $ string "}}") inline
   <?> "monospaced"
+
+citation :: JiraParser Inline
+citation = Citation
+  <$> enclosed (try $ string "??") (try $ string "??") inline
+  <?> "citation"
 
 --
 -- Helpers

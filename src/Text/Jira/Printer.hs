@@ -62,6 +62,9 @@ prettyInlines = \case
     T.singleton c <> prettyInlines rest
   [SpecialChar c] | c `elem` [':', ';'] ->
     T.singleton c
+  -- Questionmarks don't have to be escaped unless in groups of two
+  SpecialChar '?' : rest | not (startsWithQuestionMark rest) ->
+    "?" <> prettyInlines rest
   (x:xs) ->
     renderInline x <> prettyInlines xs
 
@@ -72,6 +75,10 @@ prettyInlines = \case
     isSmileyStr = \case
       Str x | x `elem` ["D", ")", "(", "P"] -> True
       _                                     -> False
+
+    startsWithQuestionMark = \case
+      SpecialChar '?' : _ -> True
+      _                   -> False
 
 -- | Internal state used by the printer.
 data PrinterState = PrinterState
@@ -222,6 +229,7 @@ renderInline :: Inline -> Text
 renderInline = \case
   Anchor name            -> "{anchor:" <> name <> "}"
   AutoLink url           -> urlText url
+  Citation ils           -> "??" <> prettyInlines ils <> "??"
   ColorInline color ils  -> "{color:" <> colorText color <> "}" <>
                             prettyInlines ils <> "{color}"
   Emoji icon             -> iconText icon
