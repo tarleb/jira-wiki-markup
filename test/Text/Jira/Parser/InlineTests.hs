@@ -258,6 +258,14 @@ tests = testGroup "Inline"
         parseJira link "[send mail|mailto:me@nope.invalid]" @?=
         Right (Link Email [Str "send", Space, Str "mail"]
                (URL "me@nope.invalid"))
+
+      , testCase "attachment link" $
+        parseJira link "[testing^test.xml]" @?=
+        Right (Link Attachment [Str "testing"] (URL "test.xml"))
+
+      , testCase "attachment without description" $
+        parseJira link "[^results.txt]" @?=
+        Right (Link Attachment [] (URL "results.txt"))
       ]
 
     , testGroup "image"

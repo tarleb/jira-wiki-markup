@@ -64,7 +64,8 @@ data InlineStyle
 
 -- | Type of a link.
 data LinkType
-  = Email                               -- ^ link to an email address
+  = Attachment                          -- ^ link to an attachment
+  | Email                               -- ^ link to an email address
   | External                            -- ^ external resource, like a website
   deriving (Eq, Ord, Show)
 

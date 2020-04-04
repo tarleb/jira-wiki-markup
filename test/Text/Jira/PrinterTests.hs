@@ -142,6 +142,14 @@ tests = testGroup "Printer"
       , testCase "email link" $
         renderInline (Link Email [Str "example"] "me@example.org") @?=
         "[example|mailto:me@example.org]"
+
+      , testCase "attachment" $
+        renderInline (Link Attachment [Str "a", Space, Str "b"] "test.txt") @?=
+        "[a b^test.txt]"
+
+      , testCase "attachment without description" $
+        renderInline (Link Attachment [] "something.txt") @?=
+        "[^something.txt]"
       ]
 
     , testCase "Styled Emphasis" $

@@ -133,7 +133,7 @@ specialChar = SpecialChar <$> (escapedChar <|> plainSpecialChar)
         return $ if b then All . (/= '|') else mempty
       inLinkPred  <- do
         b <- stateInLink  <$> getState
-        return $ if b then All . (`notElem` ("]|\n" :: String)) else mempty
+        return $ if b then All . (`notElem` ("]^|\n" :: String)) else mempty
       oneOf $ filter (getAll . (inTablePred <> inLinkPred)) specialChars
 
 
@@ -167,15 +167,13 @@ link = try $ do
   guard . not . stateInLink =<< getState
   withStateFlag (\b st -> st { stateInLink = b }) $ do
     _ <- char '['
-    (linkType, alias, linkUrl) <- externalOrMail
+    (alias, sep) <- option ([], '|') . try $ (,) <$> many inline <*> oneOf "^|"
+    (linkType, linkURL) <- if sep == '|'
+                           then (Email,) <$> email <|>
+                                (External,) <$> url
+                           else (Attachment,) . URL . pack <$> many1 urlChar
     _ <- char ']'
-    return $ Link linkType alias linkUrl
-  where
-    externalOrMail = do
-      alias <- option [] $ try (many inline <* char '|')
-      choice [ (Email, alias,) <$> email
-             , (External, alias,) <$> url
-             ]
+    return $ Link linkType alias linkURL
 
 -- | Parse a plain URL or mail address as @'AutoLink'@ element.
 autolink :: JiraParser Inline

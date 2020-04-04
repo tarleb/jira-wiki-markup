@@ -252,12 +252,14 @@ renderStyledSafely style =
   in (delim <>) . (<> delim) . prettyInlines
 
 renderLink :: LinkType -> [Inline] -> URL -> Text
-renderLink linkType inlines url =
-  "[" <> prettyInlines inlines <> "|" <> url' <> "]"
-  where
-    url' = case linkType of
-      Email    -> "mailto:" <> fromURL url
-      External -> fromURL url
+renderLink linkType inlines url = case linkType of
+  Attachment -> "[" <> prettyInlines inlines <> "^" <> fromURL url <> "]"
+  Email      -> link' $ "mailto:" <> fromURL url
+  External   -> link' $ fromURL url
+ where
+  link' urlText = case inlines of
+    [] -> "[" <> urlText <> "]"
+    _  -> "[" <> prettyInlines inlines <> "|" <> urlText <> "]"
 
 delimiterChar :: InlineStyle -> Char
 delimiterChar = \case
