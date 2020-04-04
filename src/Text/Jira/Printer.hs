@@ -256,6 +256,7 @@ renderLink linkType inlines url = case linkType of
   Attachment -> "[" <> prettyInlines inlines <> "^" <> fromURL url <> "]"
   Email      -> link' $ "mailto:" <> fromURL url
   External   -> link' $ fromURL url
+  User       -> link' $ "~" <> fromURL url
  where
   link' urlText = case inlines of
     [] -> "[" <> urlText <> "]"

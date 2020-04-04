@@ -170,7 +170,8 @@ link = try $ do
     (alias, sep) <- option ([], '|') . try $ (,) <$> many inline <*> oneOf "^|"
     (linkType, linkURL) <- if sep == '|'
                            then (Email,) <$> email <|>
-                                (External,) <$> url
+                                (External,) <$> url <|>
+                                (User,) <$> userLink
                            else (Attachment,) . URL . pack <$> many1 urlChar
     _ <- char ']'
     return $ Link linkType alias linkURL
@@ -201,6 +202,10 @@ url = try $ do
 -- | Parses an email URI, returns the mail address without schema.
 email :: JiraParser URL
 email = URL . pack <$> try (string "mailto:" *> many1 urlChar)
+
+-- | Parses a user-identifying resource name
+userLink :: JiraParser URL
+userLink = URL . pack <$> (char '~' *> many (noneOf "|]\n\r"))
 
 -- | Parses a character which is allowed in URLs
 urlChar :: JiraParser Char

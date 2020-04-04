@@ -67,6 +67,7 @@ data LinkType
   = Attachment                          -- ^ link to an attachment
   | Email                               -- ^ link to an email address
   | External                            -- ^ external resource, like a website
+  | User                                -- ^ link to a user
   deriving (Eq, Ord, Show)
 
 -- | Blocks of text.

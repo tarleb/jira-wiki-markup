@@ -150,6 +150,10 @@ tests = testGroup "Printer"
       , testCase "attachment without description" $
         renderInline (Link Attachment [] "something.txt") @?=
         "[^something.txt]"
+
+      , testCase "user" $
+        renderInline (Link User [Str "John", Space, Str "Doe"] "ab34-cdef") @?=
+        "[John Doe|~ab34-cdef]"
       ]
 
     , testCase "Styled Emphasis" $

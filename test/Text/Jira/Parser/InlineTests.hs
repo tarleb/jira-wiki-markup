@@ -266,6 +266,14 @@ tests = testGroup "Inline"
       , testCase "attachment without description" $
         parseJira link "[^results.txt]" @?=
         Right (Link Attachment [] (URL "results.txt"))
+
+      , testCase "user link" $
+        parseJira link "[testing|~account-id:something]" @?=
+        Right (Link User [Str "testing"] (URL "account-id:something"))
+
+      , testCase "user without description" $
+        parseJira link "[~username]" @?=
+        Right (Link User [] (URL "username"))
       ]
 
     , testGroup "image"
