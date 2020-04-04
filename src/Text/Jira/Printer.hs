@@ -228,15 +228,15 @@ listItemToJira items = do
 renderInline :: Inline -> Text
 renderInline = \case
   Anchor name            -> "{anchor:" <> name <> "}"
-  AutoLink url           -> urlText url
+  AutoLink url           -> fromURL url
   Citation ils           -> "??" <> prettyInlines ils <> "??"
   ColorInline color ils  -> "{color:" <> colorText color <> "}" <>
                             prettyInlines ils <> "{color}"
   Emoji icon             -> iconText icon
   Entity entity          -> "&" <> entity <> ";"
-  Image ps url           -> "!" <> urlText url <> renderImageParams ps <> "!"
+  Image ps url           -> "!" <> fromURL url <> renderImageParams ps <> "!"
   Linebreak              -> "\n"
-  Link inlines (URL url) -> "[" <> prettyInlines inlines <> "|" <> url <> "]"
+  Link lt ils url        -> renderLink lt ils url
   Monospaced inlines     -> "{{" <> prettyInlines inlines <> "}}"
   Space                  -> " "
   SpecialChar c          -> case c of
@@ -251,6 +251,14 @@ renderStyledSafely style =
   let delim = T.pack ['{', delimiterChar style, '}']
   in (delim <>) . (<> delim) . prettyInlines
 
+renderLink :: LinkType -> [Inline] -> URL -> Text
+renderLink linkType inlines url =
+  "[" <> prettyInlines inlines <> "|" <> url' <> "]"
+  where
+    url' = case linkType of
+      Email    -> "mailto:" <> fromURL url
+      External -> fromURL url
+
 delimiterChar :: InlineStyle -> Char
 delimiterChar = \case
   Emphasis -> '_'
@@ -259,10 +267,6 @@ delimiterChar = \case
   Strikeout -> '-'
   Subscript -> '~'
   Superscript -> '^'
-
--- | Text rendering of an URL.
-urlText :: URL -> Text
-urlText (URL url) = url
 
 -- | Render image parameters (i.e., separate by comma).
 renderImageParams :: [Parameter] -> Text

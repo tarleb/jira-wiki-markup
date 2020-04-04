@@ -15,6 +15,7 @@ module Text.Jira.Markup
   , Block (..)
   , Inline (..)
   , InlineStyle (..)
+  , LinkType (..)
   , ListStyle (..)
   , URL (..)
   , ColorName (..)
@@ -43,7 +44,7 @@ data Inline
   | Entity Text                         -- ^ named or numeric HTML entity
   | Image [Parameter] URL               -- ^ an image
   | Linebreak                           -- ^ hard linebreak
-  | Link [Inline] URL                   -- ^ hyperlink with alias
+  | Link LinkType [Inline] URL          -- ^ hyperlink with alias
   | Monospaced [Inline]                 -- ^ text rendered with monospaced font
   | Space                               -- ^ space between words
   | SpecialChar Char                    -- ^ single char with special meaning
@@ -59,6 +60,12 @@ data InlineStyle
   | Strong                              -- ^ strongly emphasized text
   | Subscript                           -- ^ subscript text
   | Superscript                         -- ^ superscript text
+  deriving (Eq, Ord, Show)
+
+-- | Type of a link.
+data LinkType
+  = Email                               -- ^ link to an email address
+  | External                            -- ^ external resource, like a website
   deriving (Eq, Ord, Show)
 
 -- | Blocks of text.

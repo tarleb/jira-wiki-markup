@@ -1,5 +1,6 @@
 {-# LANGUAGE CPP #-}
 {-# LANGUAGE LambdaCase #-}
+{-# LANGUAGE TupleSections #-}
 {-|
 Module      : Text.Jira.Parser.Inline
 Copyright   : © 2019–2020 Albert Krewinkel
@@ -166,13 +167,20 @@ link = try $ do
   guard . not . stateInLink =<< getState
   withStateFlag (\b st -> st { stateInLink = b }) $ do
     _ <- char '['
-    alias   <- option [] $ try (many inline <* char '|')
-    linkUrl <- email <|> url
+    (linkType, alias, linkUrl) <- externalOrMail
     _ <- char ']'
-    return $ Link alias linkUrl
+    return $ Link linkType alias linkUrl
+  where
+    externalOrMail = do
+      alias <- option [] $ try (many inline <* char '|')
+      choice [ (Email, alias,) <$> email
+             , (External, alias,) <$> url
+             ]
 
+-- | Parse a plain URL or mail address as @'AutoLink'@ element.
 autolink :: JiraParser Inline
-autolink = AutoLink <$> (email <|> url) <?> "email or other URL"
+autolink = AutoLink <$> (email' <|> url) <?> "email or other URL"
+  where email' = (\(URL e) -> URL ("mailto:" <> e)) <$> email
 
 -- | Parse a URL with scheme @file@, @ftp@, @http@, @https@, @irc@, @nntp@, or
 -- @news@.
@@ -192,10 +200,9 @@ url = try $ do
         'n' -> ("nntp" <$ string "ntp") <|> ("news" <$ string "ews")
         _   -> fail "not looking at a known scheme"
 
--- | Parses an E-mail URL.
+-- | Parses an email URI, returns the mail address without schema.
 email :: JiraParser URL
-email = URL . pack <$> try
-  ((++) <$> string "mailto:" <*> many1 urlChar)
+email = URL . pack <$> try (string "mailto:" *> many1 urlChar)
 
 -- | Parses a character which is allowed in URLs
 urlChar :: JiraParser Char

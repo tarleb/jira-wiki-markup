@@ -242,21 +242,22 @@ tests = testGroup "Inline"
     , testGroup "link"
       [ testCase "unaliased link" $
         parseJira link "[https://example.org]" @?=
-        Right (Link [] (URL "https://example.org"))
+        Right (Link External [] (URL "https://example.org"))
 
       , testCase "aliased link" $
         parseJira link "[Example|https://example.org]" @?=
-        Right (Link [Str "Example"] (URL "https://example.org"))
+        Right (Link External [Str "Example"] (URL "https://example.org"))
 
       , testCase "alias with emphasis" $
         parseJira link "[_important_ example|https://example.org]" @?=
-        Right (Link [Styled Emphasis [Str "important"], Space, Str "example"]
+        Right (Link External
+               [Styled Emphasis [Str "important"], Space, Str "example"]
                 (URL "https://example.org"))
 
       , testCase "mail address" $
         parseJira link "[send mail|mailto:me@nope.invalid]" @?=
-        Right (Link [Str "send", Space, Str "mail"]
-               (URL "mailto:me@nope.invalid"))
+        Right (Link Email [Str "send", Space, Str "mail"]
+               (URL "me@nope.invalid"))
       ]
 
     , testGroup "image"

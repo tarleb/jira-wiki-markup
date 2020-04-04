@@ -1,3 +1,4 @@
+{-# OPTIONS_GHC -fno-warn-orphans #-}
 {-|
 Module      : Text.Jira.PrinterTests
 Copyright   : © 2019–2020 Albert Krewinkel
@@ -12,7 +13,8 @@ Tests for the jira wiki printer.
 module Text.Jira.PrinterTests (tests) where
 
 import Prelude hiding (unlines)
-import Data.Text (Text, unlines)
+import Data.String (IsString (fromString))
+import Data.Text (Text, pack, unlines)
 import Test.Tasty (TestTree, testGroup)
 import Test.Tasty.HUnit (testCase, (@?=))
 import Text.Jira.Markup
@@ -132,6 +134,16 @@ tests = testGroup "Printer"
       in renderInline (Image params (URL "example.jpg")) @?=
          "!example.jpg|align=right, vspace=4!"
 
+    , testGroup "link"
+      [ testCase "external link" $
+        renderInline (Link External [Str "example"] "https://example.org") @?=
+        "[example|https://example.org]"
+
+      , testCase "email link" $
+        renderInline (Link Email [Str "example"] "me@example.org") @?=
+        "[example|mailto:me@example.org]"
+      ]
+
     , testCase "Styled Emphasis" $
       renderInline (Styled Emphasis [Str "Hello,", Space, Str "World!"]) @?=
       "_Hello, World!_"
@@ -195,3 +207,6 @@ tests = testGroup "Printer"
 
 renderBlock' :: Block -> Text
 renderBlock' = withDefault . renderBlock
+
+instance IsString URL where
+  fromString = URL . pack
