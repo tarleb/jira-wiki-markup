@@ -4,6 +4,27 @@ Changelog
 `jira-wiki-markup` uses [PVP Versioning][1].
 The changelog is available [on GitHub][2].
 
+1.3.0
+-----
+
+Released 2020-04-04
+
+* Support was added for additional syntax constructs:
+
+    - citation markup (`??citation??`),
+    - links to attachments (`[title^attachment.ext]`), and
+    - user links (`[~username]`).
+
+* Changes to module `Text.Jira.Markup`:
+
+    * A new data type `LinkType` is exported from the module.
+
+    * Changes to type `Inline`:
+
+        - a new constructor `Citation` has been added;
+        - the `Link` constructor now takes an additional
+          parameter of type `LinkType`.
+
 1.2.1
 -----
 
