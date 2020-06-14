@@ -274,12 +274,13 @@ citation = Citation
 delimitingMany :: Char -> JiraParser a -> JiraParser [a]
 delimitingMany c = enclosed (char c) (char c)
 
-enclosed :: JiraParser opening -> JiraParser closing
+enclosed :: Show closing
+         => JiraParser opening -> JiraParser closing
          -> JiraParser a
          -> JiraParser [a]
 enclosed opening closing parser = try $ do
   guard =<< notAfterString
-  opening *> notFollowedBy space *> manyTill parser closing'
+  opening *> notFollowedBy space *> many1Till parser closing'
   where
     closing' = try $ do
       guard . not =<< afterSpace

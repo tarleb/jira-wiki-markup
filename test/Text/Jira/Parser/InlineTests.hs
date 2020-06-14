@@ -377,5 +377,11 @@ tests = testGroup "Inline"
       Right [ SpecialChar '-', Str ">" , Space, Str "step", Space
             , SpecialChar '-', Str ">"
             ]
+
+    , testCase "long ascii arrow" $
+      parseJira (many1 inline) "click --> done" @?=
+      Right [ Str "click", Space, SpecialChar '-', SpecialChar '-'
+            , Str ">", Space, Str "done"]
+
     ]
   ]
