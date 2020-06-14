@@ -4,6 +4,22 @@ Changelog
 `jira-wiki-markup` uses [PVP Versioning][1].
 The changelog is available [on GitHub][2].
 
+1.3.1
+-----
+
+Released 2020-06-14
+
+* Added support for links to anchors.
+
+* Styled text may not wrap across multiple lines; linebreaks in
+  marked-up text are now forbidden.
+
+* Module Text.Jira.Parser.Core: new function `many1Till` which
+  behaves like `manyTill`, but requires at least on element to be
+  parsed.
+
+* Ensured the package works with GHC 8.10.
+
 1.3.0
 -----
 
