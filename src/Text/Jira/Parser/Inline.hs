@@ -171,6 +171,7 @@ link = try $ do
     (linkType, linkURL) <- if sep == '|'
                            then (Email,) <$> email <|>
                                 (External,) <$> url <|>
+                                (External,) <$> anchorLink <|>
                                 (User,) <$> userLink
                            else (Attachment,) . URL . pack <$> many1 urlChar
     _ <- char ']'
@@ -202,6 +203,10 @@ url = try $ do
 -- | Parses an email URI, returns the mail address without schema.
 email :: JiraParser URL
 email = URL . pack <$> try (string "mailto:" *> many1 urlChar)
+
+-- | Parses the link to an anchor name.
+anchorLink :: JiraParser URL
+anchorLink = URL . pack <$> ((:) <$> char '#' <*> many1 urlChar)
 
 -- | Parses a user-identifying resource name
 userLink :: JiraParser URL
