@@ -26,6 +26,7 @@ module Text.Jira.Parser.Core
   -- * Parsing helpers
   , endOfPara
   , notFollowedBy'
+  , many1Till
   , blankline
   , skipSpaces
   , blockNames
@@ -130,6 +131,17 @@ parameters = option (Nothing, []) $ do
     key      = pack <$> many1 (noneOf "\"'\t\n\r |{}=")
     value    = pack <$> many1 (noneOf "\"'\n\r|{}=")
     language = key <* (pipe <|> lookAhead (char '}'))
+
+-- | Like @manyTill@, but reads at least one item.
+many1Till :: (Show end)
+          => JiraParser a
+          -> JiraParser end
+          -> JiraParser [a]
+many1Till p end = do
+  notFollowedBy' end
+  first <- p
+  rest <- manyTill p end
+  return (first:rest)
 
 -- | Succeeds if the parser is looking at the end of a paragraph.
 endOfPara :: JiraParser ()
