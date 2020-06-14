@@ -45,6 +45,7 @@ type JiraParser = Parsec Text ParserState
 data ParserState = ParserState
   { stateInLink      :: Bool            -- ^ whether the parser is within a link
   , stateInList      :: Bool            -- ^ whether the parser is within a list
+  , stateInMarkup    :: Bool            -- ^ whether the parser is within markup
   , stateInTable     :: Bool            -- ^ whether the parser is within a table
   , stateLastSpcPos  :: Maybe SourcePos -- ^ most recent space char position
   , stateLastStrPos  :: Maybe SourcePos -- ^ position at which the last string
@@ -56,6 +57,7 @@ defaultState :: ParserState
 defaultState = ParserState
   { stateInLink      = False
   , stateInList      = False
+  , stateInMarkup    = False
   , stateInTable     = False
   , stateLastSpcPos  = Nothing
   , stateLastStrPos  = Nothing

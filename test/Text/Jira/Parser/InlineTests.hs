@@ -164,6 +164,9 @@ tests = testGroup "Inline"
         , testCase "require word boundary after closing underscore" $
           isLeft (parseJira styled "_nope_nope") @? "no boundary after closing"
 
+        , testCase "disallow newline in markup" $
+          isLeft (parseJira styled "_eol\nnext line_") @? "newline in markup"
+
         , testCase "zero with space as word boundary" $
           parseJira ((,) <$> styled <*> str) "_yup_\8203next" @?=
           Right (Styled Emphasis [Str "yup"], Str "\8203next")

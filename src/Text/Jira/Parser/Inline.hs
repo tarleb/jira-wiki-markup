@@ -76,12 +76,13 @@ specialChars = "_+-*^~|[]{}(?!&\\:;"
 -- | Parses an in-paragraph newline as a @Linebreak@ element. Both newline
 -- characters and double-backslash are recognized as line-breaks.
 linebreak :: JiraParser Inline
-linebreak = Linebreak <$ try (
+linebreak = (<?> "linebreak") . try $ do
+  guard . not . stateInMarkup =<< getState
   choice [ void $ newline <* notFollowedBy' endOfPara
          , void $ string "\\\\" <* notFollowedBy' (char '\\')
          ]
-    <* updateLastSpcPos
-  ) <?> "linebreak"
+  updateLastSpcPos
+  return Linebreak
 
 -- | Parses whitespace and return a @Space@ element.
 whitespace :: JiraParser Inline
@@ -238,7 +239,7 @@ styled = (simpleStyled <|> forceStyled) <?> "styled text"
   where
     simpleStyled = try $ do
       styleChar <- lookAhead $ oneOf "-_+*~^"
-      content   <- styleChar `delimitingMany` inline
+      content   <- noNewlines $ styleChar `delimitingMany` inline
       let style = delimiterStyle styleChar
       return $ Styled style content
 
@@ -246,8 +247,13 @@ styled = (simpleStyled <|> forceStyled) <?> "styled text"
       styleChar <- char '{' *> oneOf "-_+*~^" <* char '}'
       let closing = try $ string ['{', styleChar, '}']
       let style   = delimiterStyle styleChar
-      content   <- manyTill inline closing
+      content   <- noNewlines $ manyTill inline closing
       return $ Styled style content
+
+-- | Makes sure that the wrapped parser does not parse inline
+-- linebreaks.
+noNewlines :: JiraParser a -> JiraParser a
+noNewlines = withStateFlag (\b st -> st { stateInMarkup = b })
 
 -- | Returns the markup kind from the delimiting markup character.
 delimiterStyle :: Char -> InlineStyle
