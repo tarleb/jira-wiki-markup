@@ -4,6 +4,14 @@ Changelog
 `jira-wiki-markup` uses [PVP Versioning][1].
 The changelog is available [on GitHub][2].
 
+1.3.2
+-----
+
+Released 2020-06-22.
+
+* Braces are now always escaped when printing; Jira treats braces
+  specially, regardless of context.
+
 1.3.1
 -----
 
