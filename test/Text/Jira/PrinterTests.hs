@@ -171,7 +171,11 @@ tests = testGroup "Printer"
     ]
 
   , testGroup "combined inlines"
-    [ testCase "special char between words" $
+    [ testCase "opening brace between words" $
+      prettyInlines [Str "a", SpecialChar '{', Str "b"] @?=
+      "a\\{b"
+
+    , testCase "other special char between words" $
       prettyInlines [Str "easy", SpecialChar '-', Str "peasy"] @?=
       "easy-peasy"
 
@@ -199,6 +203,10 @@ tests = testGroup "Printer"
     , testCase "colon is not escaped before space" $
       prettyInlines [SpecialChar ':', Space, Str "end"] @?=
       ": end"
+
+    , testCase "closing brace between spaces" $
+      prettyInlines [Space, SpecialChar '}', Space] @?=
+      " \\} "
 
     , testCase "colon not escaped before opening paren" $
       -- escaping the paren is enough

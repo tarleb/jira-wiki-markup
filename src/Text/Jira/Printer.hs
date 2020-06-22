@@ -50,11 +50,13 @@ prettyInlines = \case
     renderInline s <> renderStyledSafely style inlns <> prettyInlines rest
   Styled style inlns : s@(Str t) : rest | startsWithAlphaNum t ->
     renderStyledSafely style inlns <> renderInline s <> prettyInlines rest
-  s@Str{} : SpecialChar c : rest@(Str {}:_) ->
+  -- Most special chars don't need escaping when surrounded by spaces or within
+  -- a word. Braces are the exception, they should always be escaped.
+  s@Str{} : SpecialChar c : rest@(Str {}:_) | not (isBrace c) ->
     (renderInline s `T.snoc` c) <> prettyInlines rest
-  s@Space : SpecialChar c : rest@(Space {}:_) ->
+  s@Space : SpecialChar c : rest@(Space {}:_) | not (isBrace c) ->
     (renderInline s `T.snoc` c) <> prettyInlines rest
-  s@Linebreak : SpecialChar c : rest@(Space {}:_) ->
+  s@Linebreak : SpecialChar c : rest@(Space {}:_) | not (isBrace c) ->
     (renderInline s `T.snoc` c) <> prettyInlines rest
   -- Colon and semicolon only need escaping if they could otherwise
   -- become part of a smiley.
@@ -69,6 +71,11 @@ prettyInlines = \case
     renderInline x <> prettyInlines xs
 
   where
+    isBrace = \case
+      '{' -> True
+      '}' -> True
+      _   -> False
+
     startsWithAlphaNum t = case T.uncons t of
       Just (c, _) -> isAlphaNum c
       _           -> False
