@@ -4,6 +4,16 @@ Changelog
 `jira-wiki-markup` uses [PVP Versioning][1].
 The changelog is available [on GitHub][2].
 
+1.3.3
+-----
+
+Released 2021-02-12.
+
+* Modified the Doc parser to skip leading blank lines. This fixes
+  parsing of documents which start with multiple blank lines.
+
+* Prevent URLs within link aliases to be treated as autolinks.
+
 1.3.2
 -----
 
