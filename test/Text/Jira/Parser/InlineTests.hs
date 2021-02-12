@@ -257,6 +257,13 @@ tests = testGroup "Inline"
                [Styled Emphasis [Str "important"], Space, Str "example"]
                 (URL "https://example.org"))
 
+      , testCase "alias with URL" $
+        parseJira link "[https://example.org website|https://example.org]" @?=
+        Right (Link External
+                [ Str "https", SpecialChar ':', Str "//example.org"
+                , Space, Str "website"]
+                (URL "https://example.org"))
+
       , testCase "link to anchor" $
         parseJira link "[see here|#there]" @?=
         Right (Link External [Str "see", Space, Str "here"] (URL "#there"))

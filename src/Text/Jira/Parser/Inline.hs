@@ -180,8 +180,10 @@ link = try $ do
 
 -- | Parse a plain URL or mail address as @'AutoLink'@ element.
 autolink :: JiraParser Inline
-autolink = AutoLink <$> (email' <|> url) <?> "email or other URL"
-  where email' = (\(URL e) -> URL ("mailto:" <> e)) <$> email
+autolink = do
+  guard . not . stateInLink =<< getState
+  AutoLink <$> (email' <|> url) <?> "email or other URL"
+    where email' = (\(URL e) -> URL ("mailto:" <> e)) <$> email
 
 -- | Parse a URL with scheme @file@, @ftp@, @http@, @https@, @irc@, @nntp@, or
 -- @news@.
