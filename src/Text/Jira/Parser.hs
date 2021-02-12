@@ -33,4 +33,4 @@ parse = parseJira doc
 
 -- | Parses a list of jira blocks into a @'Doc'@ element.
 doc :: JiraParser Doc
-doc = Doc <$> many block <?> "doc"
+doc = Doc <$> (skipMany blankline *> many block) <?> "doc"

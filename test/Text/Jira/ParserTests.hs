@@ -31,6 +31,10 @@ tests = testGroup "Parser"
       parse "h1. test\nThis is ok." @?=
       Right (Doc [ Header 1 [Str "test"]
                  , Para [Str "This", Space, Str "is", Space, Str "ok."]])
+
+    , testCase "leading blank lines" $
+      parse "\n\ntext\n" @?=
+      Right (Doc [Para [Str "text"]])
     ]
 
   , testGroup "plainText"
