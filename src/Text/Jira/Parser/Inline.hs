@@ -110,7 +110,7 @@ entity = Entity . pack
 
 -- | Parses textual representation of an icon into an @'Emoji'@ element.
 emoji :: JiraParser Inline
-emoji = Emoji <$> icon <* notFollowedBy' letter <?> "emoji"
+emoji = try (Emoji <$> icon <* notFollowedBy' letter <?> "emoji")
 
 -- | Parses ASCII representation of en-dash or em-dash.
 dash :: JiraParser Inline

@@ -367,6 +367,10 @@ tests = testGroup "Inline"
       Right [ Str "verdict", SpecialChar ':', Space
             , Emoji IconSmiling, Space, Str "funny"]
 
+    , testCase "smiley within word" $
+      parseJira (normalizeInlines <$> many1 inline) "C:DE" @?=
+      Right [ Str "C", SpecialChar ':', Str "DE" ]
+
     , testCase "dash with spaces" $
       parseJira (many1 inline) "one  -- two" @?=
       Right [Str "one", Space, Str "–", Space, Str "two"]
