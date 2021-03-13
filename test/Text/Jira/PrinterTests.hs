@@ -108,6 +108,22 @@ tests = testGroup "Printer"
       let list = List Enumeration [[Para [Str "boring"]]]
           para = Para [Str "after", Space, Str "table"]
       in prettyBlocks [list, para] @?= "# boring\n\nafter table\n"
+
+    , testGroup "block quote"
+      [ testCase "single-line block quote" $
+        let bq = BlockQuote [Para
+                   [Str "Errare", Space, Str "humanum", Space, Str "est."]
+                 ]
+        in prettyBlocks [bq] @?= "bq. Errare humanum est."
+
+      , testCase "multi-line block quote" $
+        let bq = BlockQuote [Para [Str "Show", Linebreak, Str "me"]]
+        in prettyBlocks [bq] @?= "{quote}\nShow\nme\n{quote}"
+
+      , testCase "multi-paragraph block quote" $
+        let bq = BlockQuote [Para [Str "Only."], Para [Str "You."]]
+        in prettyBlocks [bq] @?= "{quote}\nOnly.\n\nYou.\n{quote}"
+      ]
     ]
 
   , testGroup "isolated inline"

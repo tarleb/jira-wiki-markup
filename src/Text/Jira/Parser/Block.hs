@@ -170,8 +170,10 @@ blockQuote = try $ singleLineBq <|> multiLineBq
                    (string "bq." *> skipMany (char ' ') *>
                     inline `manyTill` (void newline <|> eof))
     multiLineBq = BlockQuote <$>
-                  (string "{quote}" *> optional blankline *>
-                   block `manyTill` try (string "{quote}"))
+                  (string "{quote}"
+                   *> optional blankline
+                   *> skipMany (char ' ')
+                   *> block `manyTill` try (string "{quote}"))
 
 -- | Parses four consecutive hyphens as @'HorizontalRule'@.
 horizontalRule :: JiraParser Block

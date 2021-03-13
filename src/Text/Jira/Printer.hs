@@ -141,11 +141,12 @@ renderBlock = \case
                               , blks
                               , "{color}"
                               ]
-  BlockQuote [Para xs]     -> return $ "bq. " <> prettyInlines xs
+  BlockQuote [Para xs] | Linebreak `notElem` xs
+                           -> return $ "bq. " <> prettyInlines xs
   BlockQuote blocks        -> renderBlocks blocks >>= \blks -> return $ T.concat
                               [ "{quote}\n"
                               , blks
-                              , "\n{quote}"]
+                              , "{quote}"]
   Header lvl inlines       -> return $ T.concat
                               [ "h",  T.pack (show lvl), ". "
                               , prettyInlines inlines
