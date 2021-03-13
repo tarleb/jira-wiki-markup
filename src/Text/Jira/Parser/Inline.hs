@@ -171,7 +171,7 @@ link = try $ do
     (alias, sep) <- option ([], '|') . try $ (,) <$> many inline <*> oneOf "^|"
     (linkType, linkURL) <- if sep == '|'
                            then (Email,) <$> email <|>
-                                (External,) <$> url <|>
+                                (External,) <$> url False <|>
                                 (External,) <$> anchorLink <|>
                                 (User,) <$> userLink
                            else (Attachment,) . URL . pack <$> many1 urlChar
@@ -182,16 +182,17 @@ link = try $ do
 autolink :: JiraParser Inline
 autolink = do
   guard . not . stateInLink =<< getState
-  AutoLink <$> (email' <|> url) <?> "email or other URL"
+  AutoLink <$> (email' <|> url True) <?> "email or other URL"
     where email' = (\(URL e) -> URL ("mailto:" <> e)) <$> email
 
--- | Parse a URL with scheme @file@, @ftp@, @http@, @https@, @irc@, @nntp@, or
--- @news@.
-url :: JiraParser URL
-url = try $ do
+-- | Parse a URL with scheme @file@, @ftp@, @http@, @https@, @irc@,
+-- @nntp@, or @news@.
+url :: Bool -> JiraParser URL
+url isAutoLink = try $ do
+  let urlChar' = if isAutoLink then urlChar else urlChar <|> char ' '
   urlScheme <- scheme
   sep <- pack <$> string "://"
-  rest <- pack <$> many urlChar
+  rest <- pack <$> many urlChar'
   return $ URL (urlScheme `append` sep `append` rest)
   where
     scheme = do
@@ -217,8 +218,10 @@ userLink = URL . pack <$> (char '~' *> many (noneOf "|]\n\r"))
 
 -- | Parses a character which is allowed in URLs
 urlChar :: JiraParser Char
-urlChar = satisfy $ \c ->
-  c `notElem` ("|]" :: String) && ord c >= 32 && ord c <= 127
+urlChar = satisfy $ \case
+  ']' -> False    -- "]"
+  '|' -> False    -- "|"
+  x   -> ord x > 32 && ord x <= 126 -- excludes space
 
 --
 -- Color

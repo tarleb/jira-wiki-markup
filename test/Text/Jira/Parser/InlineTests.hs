@@ -226,6 +226,10 @@ tests = testGroup "Inline"
         parseJira autolink "https://example.org/foo" @?=
         Right (AutoLink (URL "https://example.org/foo"))
 
+      , testCase "link followed by text" $
+        parseJira autolink "file:///etc/fstab has passwords" @?=
+        Right (AutoLink (URL "file:///etc/fstab"))
+
       , testCase "email" $
         parseJira autolink "mailto:nobody@test.invalid" @?=
         Right (AutoLink (URL "mailto:nobody@test.invalid"))
