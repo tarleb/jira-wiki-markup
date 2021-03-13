@@ -124,6 +124,16 @@ tests = testGroup "Printer"
         let bq = BlockQuote [Para [Str "Only."], Para [Str "You."]]
         in prettyBlocks [bq] @?= "{quote}\nOnly.\n\nYou.\n{quote}"
       ]
+
+    , testGroup "panel"
+      [ testCase "simple panel" $
+        let panel = Panel [] [Para [Str "Contents!"]]
+        in prettyBlocks [panel] @?= "{panel}\nContents!\n{panel}"
+
+      , testCase "panel with title" $
+        let panel = Panel [Parameter "title" "Gimme"] [Para [Str "Contents!"]]
+        in prettyBlocks [panel] @?= "{panel:title=Gimme}\nContents!\n{panel}"
+      ]
     ]
 
   , testGroup "isolated inline"
