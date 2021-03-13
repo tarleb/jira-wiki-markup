@@ -4,6 +4,21 @@ Changelog
 `jira-wiki-markup` uses [PVP Versioning][1].
 The changelog is available [on GitHub][2].
 
+1.3.4
+-----
+
+Released 2021-03-13.
+
+* Fixed parsing of autolinks (i.e., of bare URLs in the text).
+  Previously an autolink would take up the rest of a line, as
+  spaces were allowed characters in these items.
+  
+* Emoji character sequences no longer cause parsing failures. This
+  was due to missing backtracking when emoji parsing fails.
+  
+* Block quotes are only rendered as `bq.` if they do not contain a
+  linebreak.
+
 1.3.3
 -----
 
