@@ -174,7 +174,8 @@ link = try $ do
                                 (External,) <$> url False <|>
                                 (External,) <$> anchorLink <|>
                                 (User,) <$> userLink
-                           else (Attachment,) . URL . pack <$> many1 urlChar
+                           else (Attachment,) . URL . pack <$>
+                                many1 (noneOf "\t\r\f\n]|:;/\\")
     _ <- char ']'
     return $ Link linkType alias linkURL
 

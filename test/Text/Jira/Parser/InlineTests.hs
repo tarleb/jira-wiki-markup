@@ -277,13 +277,19 @@ tests = testGroup "Inline"
         Right (Link Email [Str "send", Space, Str "mail"]
                (URL "me@nope.invalid"))
 
-      , testCase "attachment link" $
-        parseJira link "[testing^test.xml]" @?=
-        Right (Link Attachment [Str "testing"] (URL "test.xml"))
+      , testGroup "attachment link"
+        [ testCase "simple attachment" $
+          parseJira link "[testing^test.xml]" @?=
+          Right (Link Attachment [Str "testing"] (URL "test.xml"))
 
-      , testCase "attachment without description" $
-        parseJira link "[^results.txt]" @?=
-        Right (Link Attachment [] (URL "results.txt"))
+        , testCase "attachment without description" $
+          parseJira link "[^results.txt]" @?=
+          Right (Link Attachment [] (URL "results.txt"))
+
+        , testCase "filename with space and unicode" $
+          parseJira link "[^Straßenbahn Berlin.jpg]" @?=
+          Right (Link Attachment [] (URL "Straßenbahn Berlin.jpg"))
+        ]
 
       , testCase "user link" $
         parseJira link "[testing|~account-id:something]" @?=

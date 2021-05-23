@@ -177,6 +177,10 @@ tests = testGroup "Printer"
         renderInline (Link Attachment [] "something.txt") @?=
         "[^something.txt]"
 
+      , testCase "attachment with space and Unicode" $
+        renderInline (Link Attachment [] "Übergang links.txt") @?=
+        "[^Übergang links.txt]"
+
       , testCase "user" $
         renderInline (Link User [Str "John", Space, Str "Doe"] "ab34-cdef") @?=
         "[John Doe|~ab34-cdef]"
