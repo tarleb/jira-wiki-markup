@@ -35,7 +35,7 @@ module Text.Jira.Parser.Inline
   ) where
 
 import Control.Monad (guard, void)
-import Data.Char (isAlphaNum, isPunctuation, ord)
+import Data.Char (isAlphaNum, isAscii, isPunctuation, ord)
 #if !MIN_VERSION_base(4,13,0)
 import Data.Monoid ((<>), All (..))
 #else
@@ -190,7 +190,7 @@ autolink = do
 -- @nntp@, or @news@; ignores @file@ if @isAutoLink@ is false.
 url :: Bool {-^ isAutoLink -} -> JiraParser URL
 url isAutoLink = try $ do
-  let urlChar' = if isAutoLink then urlChar else urlChar <|> char ' '
+  let urlChar' = if isAutoLink then urlPathChar else urlChar <|> char ' '
   urlScheme <- scheme
   sep <- pack <$> string "://"
   rest <- pack <$> many urlChar'
@@ -224,6 +224,33 @@ urlChar = satisfy $ \case
   ']' -> False    -- "]"
   '|' -> False    -- "|"
   x   -> ord x > 32 && ord x <= 126 -- excludes space
+
+-- | Parses a character in an URL path.
+urlPathChar :: JiraParser Char
+urlPathChar = satisfy $ \case
+  '!' -> True
+  '#' -> True
+  '$' -> True
+  '%' -> True
+  '&' -> True
+  '\''-> True
+  '(' -> True
+  ')' -> True
+  '*' -> True
+  '+' -> True
+  ',' -> True
+  '-' -> True
+  '.' -> True
+  '/' -> True
+  ':' -> True
+  ';' -> True
+  '=' -> True
+  '?' -> True
+  '@' -> True
+  '\\'-> True
+  '_' -> True
+  '~' -> True
+  x   -> isAlphaNum x && isAscii x
 
 --
 -- Color

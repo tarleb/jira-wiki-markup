@@ -234,6 +234,10 @@ tests = testGroup "Inline"
         parseJira autolink "mailto:nobody@test.invalid" @?=
         Right (AutoLink (URL "mailto:nobody@test.invalid"))
 
+      , testCase "braces cannot be in bare links" $
+        parseJira autolink "https://example.edu/{*}" @?=
+        Right (AutoLink (URL "https://example.edu/"))
+
       , testCase "file URIs are not autolinks" $
         isLeft (parseJira autolink "file:///etc/fstab") @? ""
       ]
