@@ -20,7 +20,7 @@ jobs:
             cabal: '3.2'
           - ghc: '8.8.4'
             cabal: '3.4'
-          - ghc: '8.10.3'
+          - ghc: '8.10.2'
             cabal: '3.4'
 
     steps:
