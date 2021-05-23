@@ -187,8 +187,8 @@ autolink = do
     where email' = (\(URL e) -> URL ("mailto:" <> e)) <$> email
 
 -- | Parse a URL with scheme @file@, @ftp@, @http@, @https@, @irc@,
--- @nntp@, or @news@.
-url :: Bool -> JiraParser URL
+-- @nntp@, or @news@; ignores @file@ if @isAutoLink@ is false.
+url :: Bool {-^ isAutoLink -} -> JiraParser URL
 url isAutoLink = try $ do
   let urlChar' = if isAutoLink then urlChar else urlChar <|> char ' '
   urlScheme <- scheme
@@ -199,7 +199,8 @@ url isAutoLink = try $ do
     scheme = do
       first <- letter
       case first of
-        'f' -> ("file" <$ string "ile") <|> ("ftp" <$ string "tp")
+        'f' -> ("file" <$ (guard (not isAutoLink) *> string "ile")) <|>
+               ("ftp" <$ string "tp")
         'h' -> string "ttp" *> option "http" ("https" <$ char 's')
         'i' -> "irc" <$ string "rc"
         'n' -> ("nntp" <$ string "ntp") <|> ("news" <$ string "ews")

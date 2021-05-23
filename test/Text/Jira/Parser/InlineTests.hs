@@ -227,12 +227,15 @@ tests = testGroup "Inline"
         Right (AutoLink (URL "https://example.org/foo"))
 
       , testCase "link followed by text" $
-        parseJira autolink "file:///etc/fstab has passwords" @?=
-        Right (AutoLink (URL "file:///etc/fstab"))
+        parseJira autolink "ftp://example.com/passwd has passwords" @?=
+        Right (AutoLink (URL "ftp://example.com/passwd"))
 
       , testCase "email" $
         parseJira autolink "mailto:nobody@test.invalid" @?=
         Right (AutoLink (URL "mailto:nobody@test.invalid"))
+
+      , testCase "file URIs are not autolinks" $
+        isLeft (parseJira autolink "file:///etc/fstab") @? ""
       ]
 
     , testGroup "citation"
@@ -346,6 +349,10 @@ tests = testGroup "Inline"
       Right [ Str "shopping", Space, Str "at", Space
             , Str "P", Entity "amp", Str "C"
             ]
+
+    , testCase "autolink followed by pipe" $
+      parseJira (many1 inline) "https://jira.example/file.txt|" @?=
+      Right [AutoLink (URL "https://jira.example/file.txt"), SpecialChar '|']
 
     , testCase "autolink followed by pipe" $
       parseJira (many1 inline) "https://jira.example/file.txt|" @?=
