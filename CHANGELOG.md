@@ -4,6 +4,21 @@ Changelog
 `jira-wiki-markup` uses [PVP Versioning][1].
 The changelog is available [on GitHub][2].
 
+1.3.5
+-----
+
+Released 2021-05-24.
+
+
+* Allow spaces and most unicode characters in attachment links.
+
+* No longer require a newline character after `{noformat}`.
+
+* Only allow URI path segment characters in bare links.
+
+* The `file:` schema is no longer allowed in bare links; these
+  rarely make sense.
+
 1.3.4
 -----
 
