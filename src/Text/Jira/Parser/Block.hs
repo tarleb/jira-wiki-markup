@@ -183,8 +183,9 @@ horizontalRule = HorizontalRule <$
 -- | Parses a preformatted text into a @NoFormat@ element.
 noformat :: JiraParser Block
 noformat = try $ do
-  (_, params) <- string "{noformat" *> parameters <* char '}' <* newline
-  content <- anyChar `manyTill` try (string "{noformat}" *> blankline)
+  (_, params) <- string "{noformat" *> parameters <* char '}'
+  optional newline
+  content <- anyChar `manyTill` try (string "{noformat}" *> optional blankline)
   return $ NoFormat params (pack content)
 
 -- | Parses a preformatted text into a @NoFormat@ element.

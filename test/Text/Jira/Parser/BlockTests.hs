@@ -309,6 +309,10 @@ tests = testGroup "Blocks"
       , testCase "with parameters" $
         parseJira noformat "{noformat:title=test}\nline 1\nline 2{noformat}\n" @?=
         Right (NoFormat [Parameter "title" "test"] "line 1\nline 2")
+
+      , testCase "without newline" $
+        parseJira noformat "{noformat}raw text{noformat}\n" @?=
+        Right (NoFormat [] "raw text")
       ]
 
     , testGroup "panel"
