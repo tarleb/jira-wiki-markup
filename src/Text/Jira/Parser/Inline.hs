@@ -159,8 +159,10 @@ image = try $ do
     thumbnail = [Parameter "thumbnail" ""] <$ try (string "thumbnail")
     imgParams = try (Parameter <$> key <*> (char '=' *> value))
     key       = pack <$> many1 (noneOf ",\"'\t\n\r |{}=!")
-    value     = pack <$> many1 (noneOf ",\"'\n\r|{}=!")
+    value     = pack <$> (try quotedValue <|> unquotedValue)
     comma     = char ',' *> skipSpaces
+    quotedValue = char '"' *> manyTill (noneOf "\n\r") (char '"')
+    unquotedValue = many1 (noneOf ",\"'\n\r|{}=!")
 
 -- | Parse link into a @Link@ element.
 link :: JiraParser Inline

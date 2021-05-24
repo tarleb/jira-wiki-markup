@@ -326,6 +326,11 @@ tests = testGroup "Inline"
                      , Parameter "vspace" "4"
                      ]
         in Right (Image params (URL "image.gif"))
+
+      , testCase "quoted parameter" $
+        parseJira image "!foo.jpg|alt=\"some foo!\"!" @?=
+        let params = [ Parameter "alt" "some foo!"]
+        in Right (Image params (URL "foo.jpg"))
       ]
 
     , testGroup "color"
