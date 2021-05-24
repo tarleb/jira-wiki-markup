@@ -171,13 +171,14 @@ link = try $ do
   withStateFlag (\b st -> st { stateInLink = b }) $ do
     _ <- char '['
     (alias, sep) <- option ([], '|') . try $ (,) <$> many inline <*> oneOf "^|"
-    (linkType, linkURL) <- if sep == '|'
-                           then (Email,) <$> email <|>
-                                (External,) <$> url False <|>
-                                (External,) <$> anchorLink <|>
-                                (User,) <$> userLink
-                           else (Attachment,) . URL . pack <$>
-                                many1 (noneOf "\t\r\f\n]|:;/\\")
+    (linkType, linkURL) <-
+      if sep == '|'
+      then (Email,) <$> email <|>
+           (External,) <$> anchorLink <|>
+           (User,) <$> userLink <|>
+           externalLink
+      else (Attachment,) . URL . pack <$>
+           many1 (noneOf "\t\r\f\n]|:;/\\")
     _ <- char ']'
     return $ Link linkType alias linkURL
 
@@ -219,6 +220,23 @@ anchorLink = URL . pack <$> ((:) <$> char '#' <*> many1 urlChar)
 -- | Parses a user-identifying resource name
 userLink :: JiraParser URL
 userLink = URL . pack <$> (char '~' *> many (noneOf "|]\n\r"))
+
+-- | Parses an external link, i.e., either a plain link to an external
+-- website, or a \"smart\" link or card.
+externalLink :: JiraParser (LinkType, URL)
+externalLink = do
+  url' <- url False
+  mSmartType <- optionMaybe (char '|' *> smartLinkType)
+  return $ case mSmartType of
+    Nothing -> (External, url')
+    Just st -> (st, url')
+
+-- | Finds the type of a "smart" link.
+smartLinkType :: JiraParser LinkType
+smartLinkType = string "smart-" *> choice
+  [ SmartLink <$ string "link"
+  , SmartCard <$ string "card"
+  ]
 
 -- | Parses a character which is allowed in URLs
 urlChar :: JiraParser Char

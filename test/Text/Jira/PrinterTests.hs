@@ -184,6 +184,16 @@ tests = testGroup "Printer"
       , testCase "user" $
         renderInline (Link User [Str "John", Space, Str "Doe"] "ab34-cdef") @?=
         "[John Doe|~ab34-cdef]"
+
+      , testCase "smart link" $
+        renderInline (Link SmartLink [Str "repo"]
+                      "https://github.com/tarleb/jira-wiki-markup") @?=
+        "[repo|https://github.com/tarleb/jira-wiki-markup|smart-link]"
+
+      , testCase "smart card" $
+        renderInline (Link SmartCard [Str "hslua"]
+                      "https://github.com/hslua/hslua") @?=
+        "[hslua|https://github.com/hslua/hslua|smart-card]"
       ]
 
     , testCase "Styled Emphasis" $

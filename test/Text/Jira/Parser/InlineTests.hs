@@ -298,6 +298,19 @@ tests = testGroup "Inline"
           Right (Link Attachment [] (URL "Straßenbahn Berlin.jpg"))
         ]
 
+      , testGroup "smart links"
+        [ testCase "smart link" $
+          parseJira link "[hslua|https://github.com/hslua/hslua|smart-link]" @?=
+          Right (Link SmartLink [Str "hslua"]
+                 (URL "https://github.com/hslua/hslua"))
+
+        , testCase "smart card" $
+          parseJira link
+            "[repo|https://github.com/tarleb/jira-wiki-markup|smart-card]" @?=
+          Right (Link SmartCard [Str "repo"]
+                 (URL "https://github.com/tarleb/jira-wiki-markup"))
+        ]
+
       , testCase "user link" $
         parseJira link "[testing|~account-id:something]" @?=
         Right (Link User [Str "testing"] (URL "account-id:something"))
