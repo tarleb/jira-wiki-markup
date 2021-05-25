@@ -4,6 +4,18 @@ Changelog
 `jira-wiki-markup` uses [PVP Versioning][1].
 The changelog is available [on GitHub][2].
 
+1.4.0
+-----
+
+Released 2021-05-25.
+
+* Allow quoted image parameters.
+
+* Added support for "smart links".
+
+* **API Change**: Add new constructors `SmartCard` and `SmartLink` to
+  Text.Jira.Markup.LinkType.
+
 1.3.5
 -----
 
