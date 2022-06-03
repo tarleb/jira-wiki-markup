@@ -1,4 +1,4 @@
-cabal-version:       2.0
+cabal-version:       2.4
 name:                jira-wiki-markup
 version:             1.4.0
 synopsis:            Handle Jira wiki markup
@@ -28,7 +28,22 @@ source-repository head
   type:                git
   location:            https://github.com/tarleb/jira-wiki-markup.git
 
+common common-options
+  build-depends:       base    >= 4.9   && < 5
+                     , text    >= 1.1.1 && < 1.3 || >= 2.0 && < 2.1
+  default-language:    Haskell2010
+  default-extensions:  OverloadedStrings
+  ghc-options:         -Wall
+                       -Wincomplete-uni-patterns
+                       -Wincomplete-record-updates
+                       -Wcompat
+                       -Widentities
+                       -Wredundant-constraints
+  if impl(ghc >= 8.4)
+    ghc-options:         -fhide-source-paths
+
 library
+  import:              common-options
   hs-source-dirs:      src
   exposed-modules:     Text.Jira.Markup
                      , Text.Jira.Parser
@@ -39,47 +54,21 @@ library
                      , Text.Jira.Parser.Shared
                      , Text.Jira.Printer
 
-  build-depends:       base    >= 4.9   && < 5
-                     , mtl     >= 2.2   && < 2.3
+  build-depends:       mtl     >= 2.2   && < 2.3
                      , parsec  >= 3.1   && < 3.2
-                     , text    >= 1.1.1 && < 1.3 || >= 2.0 && < 2.1
 
-  ghc-options:         -Wall
-                       -Wincomplete-uni-patterns
-                       -Wincomplete-record-updates
-                       -Wcompat
-                       -Widentities
-                       -Wredundant-constraints
-  if impl(ghc >= 8.4)
-    ghc-options:         -fhide-source-paths
-
-  default-language:    Haskell2010
-  default-extensions:  OverloadedStrings
 
 executable jira-wiki-markup
+  import:              common-options
   hs-source-dirs:      app
   main-is:             Main.hs
-
-  build-depends:       base    >= 4.9   && < 5
-                     , text    >= 1.1.1 && < 1.3 || >= 2.0 && < 2.1
-                     , jira-wiki-markup
-
-  ghc-options:         -Wall
-                       -threaded
+  build-depends:       jira-wiki-markup
+  ghc-options:         -threaded
                        -rtsopts
                        -with-rtsopts=-N
-                       -Wincomplete-uni-patterns
-                       -Wincomplete-record-updates
-                       -Wcompat
-                       -Widentities
-                       -Wredundant-constraints
-  if impl(ghc >= 8.4)
-    ghc-options:         -fhide-source-paths
-
-  default-language:    Haskell2010
-  default-extensions:  OverloadedStrings
 
 test-suite jira-wiki-markup-test
+  import:              common-options
   type:                exitcode-stdio-1.0
   hs-source-dirs:      test
   main-is:             jira-wiki-markup-test.hs
@@ -87,25 +76,10 @@ test-suite jira-wiki-markup-test
                      , Text.Jira.Parser.BlockTests
                      , Text.Jira.Parser.InlineTests
                      , Text.Jira.PrinterTests
-
-  build-depends:       base    >= 4.9   && < 5
-                     , jira-wiki-markup
+  build-depends:       jira-wiki-markup
                      , parsec  >= 3.1   && < 3.2
                      , tasty
                      , tasty-hunit
-                     , text    >= 1.1.1 && < 1.3 || >= 2.0 && < 2.1
-
-  ghc-options:         -Wall
-                       -threaded
+  ghc-options:         -threaded
                        -rtsopts
                        -with-rtsopts=-N
-                       -Wincomplete-uni-patterns
-                       -Wincomplete-record-updates
-                       -Wcompat
-                       -Widentities
-                       -Wredundant-constraints
-  if impl(ghc >= 8.4)
-    ghc-options:         -fhide-source-paths
-
-  default-language:    Haskell2010
-  default-extensions:  OverloadedStrings
