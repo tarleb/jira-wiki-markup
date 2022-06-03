@@ -30,8 +30,8 @@ jobs:
     steps:
       - uses: actions/checkout@v2
 
-      - uses: actions/setup-haskell@v1
-        name: Setup Haskell
+      - name: Setup Haskell
+        uses: haskell/actions/setup@v1
         with:
           ghc-version: ${{ matrix.versions.ghc }}
           cabal-version: ${{ matrix.versions.cabal }}
