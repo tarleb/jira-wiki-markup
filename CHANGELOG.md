@@ -4,6 +4,19 @@ Changelog
 `jira-wiki-markup` uses [PVP Versioning][1].
 The changelog is available [on GitHub][2].
 
+1.5.0
+-----
+
+Released 2023-01-11.
+
+* Relaxed upper bounds for mtl, allow mtl 2.3.
+
+* Fixed handling of character sequences that would be interpreted
+  as icons if they weren't followed by an alphanumeric character.
+  See also [pandoc issue #8511][].
+
+[pandoc issue #8511]: https://github.com/jgm/pandoc/issues/8511
+
 1.4.0
 -----
 
