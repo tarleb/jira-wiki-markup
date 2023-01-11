@@ -1,7 +1,7 @@
 {-# OPTIONS_GHC -fno-warn-orphans #-}
 {-|
 Module      : Text.Jira.PrinterTests
-Copyright   : © 2019–2021 Albert Krewinkel
+Copyright   : © 2019–2023 Albert Krewinkel
 License     : MIT
 
 Maintainer  : Albert Krewinkel <tarleb@zeitkraut.de>
