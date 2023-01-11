@@ -110,7 +110,7 @@ entity = Entity . pack
 
 -- | Parses textual representation of an icon into an @'Emoji'@ element.
 emoji :: JiraParser Inline
-emoji = try (Emoji <$> icon <* notFollowedBy' letter <?> "emoji")
+emoji = try (Emoji <$> icon <?> "emoji")
 
 -- | Parses ASCII representation of en-dash or em-dash.
 dash :: JiraParser Inline
@@ -121,7 +121,7 @@ dash = try $ do
          , pure (Str "–")          -- en dash
          ] <* lookAhead (void (char ' ') <|> eof)
 
--- | Parses a special character symbol as a @Str@.
+-- | Parses a special character symbol as a 'SpecialChar'.
 specialChar :: JiraParser Inline
 specialChar = SpecialChar <$> (escapedChar <|> plainSpecialChar)
   <?> "special char"

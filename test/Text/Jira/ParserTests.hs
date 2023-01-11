@@ -50,9 +50,22 @@ tests = testGroup "Parser"
       plainText ":)" @?=
       Right [Str "\\:)"]
 
+    , testCase "smiley and text" $
+      plainText ":D lol" @?=
+      Right [Str "\\:D", Space, Str "lol"]
+
     , testCase "icon after word" $
       plainText "f(x)" @?=
       Right [Str "f\\(x)"]
+
+    , testCase "icon-sequence at start of word" $
+      plainText ":PA" @?=
+      Right [SpecialChar ':', Str "PA"]
+
+    , testCase "icon-sequence followed by digit" $
+      plainText ":P2" @?=
+      Right [SpecialChar ':', Str "P2"]
+
 
     , testCase "special chars" $
       plainText "*not strong*" @?=

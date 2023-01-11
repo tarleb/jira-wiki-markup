@@ -244,6 +244,10 @@ tests = testGroup "Printer"
       prettyInlines [SpecialChar ':', Space, Str "end"] @?=
       ": end"
 
+    , testCase "colon is not escaped before non-emoji word" $
+      prettyInlines [Space, SpecialChar ':', Str "PA"] @?=
+      " :PA"
+
     , testCase "closing brace between spaces" $
       prettyInlines [Space, SpecialChar '}', Space] @?=
       " \\} "

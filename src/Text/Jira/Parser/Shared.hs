@@ -22,7 +22,7 @@ import Text.Parsec
 
 -- | Parses an icon
 icon :: Parsec Text u Icon
-icon = smiley <|> otherIcon
+icon = (smiley <|> otherIcon) <* notFollowedBy alphaNum
 
 smiley :: Parsec Text u Icon
 smiley = try $ choice

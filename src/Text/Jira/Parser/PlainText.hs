@@ -40,7 +40,7 @@ plainText = parseJira (normalizeInlines <$> many plainInlineParser)
 
 -- | Escapes text which would otherwise render as an icon.
 escapeIcon :: Parsec Text u Inline
-escapeIcon = Str . ("\\" `append`) . iconText <$> icon
+escapeIcon = Str . ("\\" `append`) . iconText <$> try icon
 
 plainSpecialChar :: Parsec Text u Inline
 plainSpecialChar = SpecialChar <$> oneOf specialChars
