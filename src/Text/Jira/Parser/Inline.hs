@@ -123,9 +123,13 @@ dash = try $ do
 
 -- | Parses a special character symbol as a 'SpecialChar'.
 specialChar :: JiraParser Inline
-specialChar = SpecialChar <$> (escapedChar <|> plainSpecialChar)
+specialChar = SpecialChar <$> (backslash <|> escapedChar <|> plainSpecialChar)
   <?> "special char"
   where
+    -- backslash before an icon-sequence that's not an emoji does *not*
+    -- work as an escape character.
+    backslash = try (char '\\' <* lookAhead (icon' *> alphaNum))
+
     escapedChar = try (char '\\' *> satisfy isPunctuation)
 
     plainSpecialChar = do

@@ -406,6 +406,10 @@ tests = testGroup "Inline"
       parseJira (normalizeInlines <$> many1 inline) "C:DE" @?=
       Right [ Str "C", SpecialChar ':', Str "DE" ]
 
+    , testCase "backslash is literal if it's not necessary" $
+      parseJira (normalizeInlines <$> many1 inline) "\\:PA" @?=
+      Right [ SpecialChar '\\', SpecialChar ':', Str "PA"]
+
     , testCase "dash with spaces" $
       parseJira (many1 inline) "one  -- two" @?=
       Right [Str "one", Space, Str "–", Space, Str "two"]

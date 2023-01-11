@@ -12,6 +12,7 @@ Parsers whch are shared between multiple modules.
 -}
 module Text.Jira.Parser.Shared
   ( icon
+  , icon'
   , colorName
   ) where
 
@@ -22,7 +23,12 @@ import Text.Parsec
 
 -- | Parses an icon
 icon :: Parsec Text u Icon
-icon = (smiley <|> otherIcon) <* notFollowedBy alphaNum
+icon = icon' <* notFollowedBy alphaNum
+
+-- | Like 'icon', but doesn't check whether the sequence is followed by
+-- a character that would prevent the interpretation as an icon.
+icon' :: Parsec Text u Icon
+icon' = smiley <|> otherIcon
 
 smiley :: Parsec Text u Icon
 smiley = try $ choice
