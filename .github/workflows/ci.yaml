@@ -30,15 +30,15 @@ jobs:
             cabal: '3.8'
 
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
 
       - name: Setup Haskell
-        uses: haskell/actions/setup@v1
+        uses: haskell/actions/setup@v2
         with:
           ghc-version: ${{ matrix.versions.ghc }}
           cabal-version: ${{ matrix.versions.cabal }}
 
-      - uses: actions/cache@v1
+      - uses: actions/cache@v3
         name: Cache ~/.cabal/store
         with:
           path: ~/.cabal/store
@@ -58,7 +58,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
 
       - name: Check stack version
         run:  |
