@@ -4,6 +4,13 @@ Changelog
 `jira-wiki-markup` uses [PVP Versioning][1].
 The changelog is available [on GitHub][2].
 
+1.5.1
+-----
+
+Released 2023-03-13.
+
+* Parser: Disallow image paths that start with a space.
+
 1.5.0
 -----
 
