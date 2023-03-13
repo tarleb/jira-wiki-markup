@@ -35,7 +35,7 @@ module Text.Jira.Parser.Inline
   ) where
 
 import Control.Monad (guard, void)
-import Data.Char (isAlphaNum, isAscii, isPunctuation, ord)
+import Data.Char (isAlphaNum, isAscii, isPunctuation, isSpace, ord)
 #if !MIN_VERSION_base(4,13,0)
 import Data.Monoid ((<>), All (..))
 #else
@@ -155,7 +155,9 @@ anchor = Anchor . pack . filter (/= ' ')
 image :: JiraParser Inline
 image = try $ do
   -- does not use @url@, as is may contain relative locations.
-  src <- char '!' *> (URL . pack <$> many1 (noneOf "\r\t\n|]!"))
+  src <- char '!'
+         *> lookAhead (satisfy $ not . isSpace)
+         *> (URL . pack <$> many1 (noneOf "\r\t\n|]!"))
   params <- option [] (char '|' *> (thumbnail <|> imgParams `sepBy` comma))
   _ <- char '!'
   return $ Image params src

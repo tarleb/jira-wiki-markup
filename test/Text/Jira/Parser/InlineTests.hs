@@ -344,6 +344,10 @@ tests = testGroup "Inline"
         parseJira image "!foo.jpg|alt=\"some foo!\"!" @?=
         let params = [ Parameter "alt" "some foo!"]
         in Right (Image params (URL "foo.jpg"))
+
+      , testCase "first character cannot be a space" $
+        isLeft (parseJira image "! foo.jpg!") @?
+        "An image cannot start with a space."
       ]
 
     , testGroup "color"
