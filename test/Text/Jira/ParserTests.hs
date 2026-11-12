@@ -42,6 +42,11 @@ tests = testGroup "Parser"
     [ testCase "many lines of colored text" $
       parse (T.replicate 50 "{color:red}text{color}\n") @?=
       Right (Doc (replicate 50 (Para [ColorInline (ColorName "red") [Str "text"]])))
+
+    , testCase "many opening but no closing delimiters" $
+      parse (T.intercalate " " (replicate 50 "-e FOO")) @?=
+      Right (Doc [Para (drop 1 . concat $ replicate 50
+                         [Space, SpecialChar '-', Str "e", Space, Str "FOO"])])
     ]
 
   , testGroup "plainText"
