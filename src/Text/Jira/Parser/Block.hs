@@ -199,6 +199,10 @@ panel = try $ do
 color :: JiraParser Block
 color= try $ do
   name <- string "{color:" *> colorName <* char '}'
+  -- Colored text that is closed on the same line is inline text, not a
+  -- block. Ruling the block out early also avoids exponential
+  -- backtracking on many consecutive lines of colored text.
+  notFollowedBy' $ manyTill (noneOf "\n") (try $ string "{color}")
   content <- block `manyTill` try (string "{color}" *> blankline)
   return $ Color (ColorName $ pack name) content
 
