@@ -343,6 +343,10 @@ tests = testGroup "Blocks"
         Right (Color (ColorName "#cccccc")
                [Para [ Linebreak, Str "This", Space
                      , Str "is", Space, Str "gray."]])
+
+      , testCase "closed on the same line" $
+        isLeft (parseJira color "{color:red}This is red.{color}\nfoo\n{color}\n") @?
+        "colored text closed on the same line is not a block"
       ]
 
     , testGroup "blockQuote"

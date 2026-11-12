@@ -299,6 +299,11 @@ styled = (simpleStyled <|> forceStyled) <?> "styled text"
   where
     simpleStyled = try $ do
       styleChar <- lookAhead $ oneOf "-_+*~^"
+      -- Cheap checks done by 'delimitingMany' as well; they make sure
+      -- that the more expensive check is only done when necessary.
+      guard =<< notAfterString
+      lookAhead $ char styleChar *> notFollowedBy space
+      lookAhead $ char styleChar *> potentialCloser styleChar
       content   <- noNewlines $ styleChar `delimitingMany` inline
       let style = delimiterStyle styleChar
       return $ Styled style content
@@ -309,6 +314,25 @@ styled = (simpleStyled <|> forceStyled) <?> "styled text"
       let style   = delimiterStyle styleChar
       content   <- noNewlines $ manyTill inline closing
       return $ Styled style content
+
+-- | Succeeds if the remaining input contains a character which could
+-- close styled text delimited by @c@: the character @c@, not preceded
+-- by a space, and followed by a non-alphanumeric character or by the
+-- end of the input.
+--
+-- The closing delimiter of styled text must meet these conditions, so
+-- styled text can only be parsed if such a character exists. Checking
+-- for it first avoids exponential backtracking on text with many
+-- opening delimiters but no closing one, like @-e FOO -e BAR -e BAZ ...@.
+potentialCloser :: Char -> JiraParser ()
+potentialCloser c = try $ go False
+  where
+    go afterSpc = do
+      x <- anyChar
+      if x == c && not afterSpc
+        then lookAhead wordBoundary <|> go False
+        else go (x == ' ')
+    wordBoundary = void (satisfy (not . isAlphaNum)) <|> eof
 
 -- | Makes sure that the wrapped parser does not parse inline
 -- linebreaks.

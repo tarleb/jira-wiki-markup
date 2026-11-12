@@ -11,8 +11,8 @@ Tests for the jira wiki parser.
 -}
 module Text.Jira.ParserTests (tests) where
 
-import Data.Text ()
-import Test.Tasty (TestTree, testGroup)
+import qualified Data.Text as T
+import Test.Tasty (TestTree, localOption, mkTimeout, testGroup)
 import Test.Tasty.HUnit (testCase, (@?=))
 import Text.Jira.Parser
 import qualified Text.Jira.Parser.BlockTests
@@ -35,6 +35,18 @@ tests = testGroup "Parser"
     , testCase "leading blank lines" $
       parse "\n\ntext\n" @?=
       Right (Doc [Para [Str "text"]])
+    ]
+
+  -- These inputs used to take time exponential in their length.
+  , localOption (mkTimeout 5000000) $ testGroup "performance"
+    [ testCase "many lines of colored text" $
+      parse (T.replicate 50 "{color:red}text{color}\n") @?=
+      Right (Doc (replicate 50 (Para [ColorInline (ColorName "red") [Str "text"]])))
+
+    , testCase "many opening but no closing delimiters" $
+      parse (T.intercalate " " (replicate 50 "-e FOO")) @?=
+      Right (Doc [Para (drop 1 . concat $ replicate 50
+                         [Space, SpecialChar '-', Str "e", Space, Str "FOO"])])
     ]
 
   , testGroup "plainText"
